@@ -1,6 +1,9 @@
 # Alchemy
 
-An antechamber for information metabolism. Single-page vanilla JS PWA. No framework, no build step, no dependencies.
+An antechamber for information metabolism. Absorbs The Metabolizer. Two products, one codebase:
+
+- **PWA** (`/`) — Single-page vanilla JS. No framework, no build step. Free at risaac09.github.io/alchemy/
+- **Obsidian plugin** (`/obsidian-plugin/`) — TypeScript + esbuild. "Keep" writes vault notes. Maps → subfolders.
 
 **Live:** https://risaac09.github.io/alchemy/
 **Repo:** https://github.com/risaac09/alchemy
@@ -19,9 +22,17 @@ icon-*.png  — App icons (192, 512)
 
 No build. No bundler. Edit the files directly and push.
 
-## Core Mechanics
+## Core Mechanics — v1.2.0 (Metabolizer merge)
 
-The app follows an alchemical loop: **Capture (Inhale) -> Reflect (Pause) -> Transform (Alchemize) -> Release (Exhale)**.
+The loop: **Capture (Inhale) → Settle → Somatic pulse → Reflect (Pause) → Transform (Alchemize) → Map → Release (Exhale)**
+
+Metabolizer concepts absorbed:
+- **Somatic pulse** — one-word body check before reflection, stored on gold + archive items
+- **Maps** — 5 types (observation/question/connection/tension/practice), tagged at keep, filterable in archive; in plugin: write to map subfolders
+- **Weekly Threshold** — "What shifted?" prompt in Log, stores up to 52 entries
+- **Friction Log** — meta-practice in Log, one-line avoidance catches
+
+The original loop: **Capture (Inhale) → Reflect (Pause) → Transform (Alchemize) → Release (Exhale)**
 
 | Constant | Value | Purpose |
 |---|---|---|

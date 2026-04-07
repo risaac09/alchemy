@@ -1,0 +1,11 @@
+{
+  "id": "alchemy",
+  "name": "Alchemy",
+  "version": "1.2.0",
+  "minAppVersion": "1.4.0",
+  "description": "An antechamber for information metabolism. Capture, reflect, transform, release. Gold writes to your vault.",
+  "author": "Isaac Rubinstein",
+  "authorUrl": "https://rubinsteinproductions.com",
+  "fundingUrl": "https://github.com/risaac09/alchemy",
+  "isDesktopOnly": false
+}
