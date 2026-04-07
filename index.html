@@ -134,6 +134,11 @@
 
       <p class="reflect-prompt" id="reflectPrompt"></p>
 
+      <div class="body-check-wrap">
+        <label class="body-check-label" for="bodyCheckInput">Somatic pulse</label>
+        <input class="body-check-input" id="bodyCheckInput" type="text" maxlength="30" placeholder="one word — what's loudest?" autocomplete="off" spellcheck="false" />
+      </div>
+
       <div class="reflect-input-wrap">
         <textarea
           class="reflect-input"
@@ -175,6 +180,14 @@
         <input type="search" class="archive-search" id="archiveSearch" placeholder="Search gold..." />
         <button class="archive-sort-btn" id="archiveSortBtn" title="Toggle sort order">newest</button>
         <button class="archive-select-btn" id="archiveSelectBtn" title="Select items for bulk release">select</button>
+      </div>
+      <div class="archive-map-filter" id="archiveMapFilter">
+        <button class="archive-map-filter-btn active" data-map="">all</button>
+        <button class="archive-map-filter-btn" data-map="observation">obs</button>
+        <button class="archive-map-filter-btn" data-map="question">qn</button>
+        <button class="archive-map-filter-btn" data-map="connection">conn</button>
+        <button class="archive-map-filter-btn" data-map="tension">tension</button>
+        <button class="archive-map-filter-btn" data-map="practice">practice</button>
       </div>
       <span class="archive-carrying-cost" id="archiveCarryingCost"></span>
     </div>
@@ -218,6 +231,18 @@
     <h2 id="releaseModalTitle">The moment of release</h2>
     <p>Every thing you keep costs you something to carry. Every thing you release makes room for what comes next.</p>
     <div class="modal-cost" id="modalCost"></div>
+    <div class="modal-map-select" id="modalMapSelect">
+      <div class="modal-map-label">Where does this connect?</div>
+      <div class="modal-map-options" id="modalMapOptions">
+        <button class="modal-map-btn active" data-map="">none</button>
+        <button class="modal-map-btn" data-map="observation">observation</button>
+        <button class="modal-map-btn" data-map="question">question</button>
+        <button class="modal-map-btn" data-map="connection">connection</button>
+        <button class="modal-map-btn" data-map="tension">tension</button>
+        <button class="modal-map-btn" data-map="practice">practice</button>
+      </div>
+    </div>
+
     <div class="modal-actions">
       <button class="modal-keep" id="modalKeep">Keep — move to archive</button>
       <button class="modal-letgo" id="modalLetGo">Let go — return it to the void</button>

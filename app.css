@@ -2073,3 +2073,232 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* ═══ METABOLIZER MERGE — v1.2.0 ═══ */
+
+  /* Body check (somatic pulse) in reflect view */
+  .body-check-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    border-left: 1px solid var(--bark-lighter);
+  }
+
+  .body-check-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rust);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .body-check-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--bark-lighter);
+    color: var(--parchment);
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    font-style: italic;
+    padding: 2px 4px;
+    width: 160px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .body-check-input::placeholder { color: var(--bark-lighter); }
+  .body-check-input:focus { border-bottom-color: var(--amber-dim); }
+
+  /* Map selector in release modal */
+  .modal-map-select {
+    display: none;
+    margin-bottom: 24px;
+  }
+
+  .modal-map-select.visible { display: block; }
+
+  .modal-map-label {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--parchment-dim);
+    margin-bottom: 10px;
+    opacity: 0.7;
+  }
+
+  .modal-map-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .modal-map-btn {
+    background: none;
+    border: 1px solid var(--bark-lighter);
+    color: var(--parchment-dim);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .modal-map-btn:hover {
+    border-color: var(--amber-dim);
+    color: var(--parchment);
+  }
+
+  .modal-map-btn.active {
+    background: var(--amber-glow);
+    border-color: var(--amber-dim);
+    color: var(--amber);
+  }
+
+  /* Archive map filter row */
+  .archive-map-filter {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .archive-map-filter-btn {
+    background: none;
+    border: 1px solid var(--bark-lighter);
+    color: var(--parchment-dim);
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .archive-map-filter-btn:hover {
+    border-color: var(--parchment-dim);
+    color: var(--parchment);
+  }
+
+  .archive-map-filter-btn.active {
+    background: var(--amber-glow);
+    border-color: var(--amber-dim);
+    color: var(--amber);
+  }
+
+  /* Map tag on archive items */
+  .archive-item-map {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber-dim);
+    border: 1px solid rgba(255, 191, 0, 0.2);
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-bottom: 8px;
+  }
+
+  /* Body check display on archive items */
+  .archive-item-body-check {
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    color: var(--parchment-dim);
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+    opacity: 0.6;
+  }
+
+  .archive-item-body-check::before { content: '◦ '; }
+
+  /* Log threshold section */
+  .log-threshold-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--bark-lighter);
+    color: var(--parchment);
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-style: italic;
+    line-height: 1.6;
+    padding: 8px 0;
+    resize: none;
+    outline: none;
+    min-height: 80px;
+    transition: border-color 0.3s;
+  }
+
+  .log-threshold-input::placeholder { color: var(--bark-lighter); font-style: italic; }
+  .log-threshold-input:focus { border-bottom-color: var(--amber-dim); }
+
+  .log-submit-btn {
+    background: none;
+    border: 1px solid var(--bark-lighter);
+    color: var(--parchment-dim);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+
+  .log-submit-btn:hover {
+    border-color: var(--amber-dim);
+    color: var(--parchment);
+  }
+
+  /* Friction log input */
+  .log-friction-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--bark-lighter);
+    color: var(--parchment);
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    font-style: italic;
+    padding: 6px 0;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .log-friction-input::placeholder { color: var(--bark-lighter); font-style: italic; }
+  .log-friction-input:focus { border-bottom-color: var(--amber-dim); }
+
+  /* Threshold and friction log entry display */
+  .log-entry-list { margin-top: 12px; }
+
+  .log-entry-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bark-lighter);
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--parchment-dim);
+  }
+
+  .log-entry-item:last-child { border-bottom: none; }
+
+  .log-entry-date {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    color: var(--bark-lighter);
+    display: block;
+    margin-bottom: 3px;
+  }

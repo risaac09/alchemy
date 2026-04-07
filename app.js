@@ -4,7 +4,7 @@
   // ═══════════════════════════════════════════════
   //  THERMODYNAMIC CONSTANTS
   // ═══════════════════════════════════════════════
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
   const MAX_CAPACITY = 7;          // Cassette tape finitude
   const DECAY_MS = 72 * 3600000;   // 72 hours to full decay
   const SETTLE_MS = 30000;         // 30 seconds before item is reflectable
@@ -27,6 +27,8 @@
         if (!s.events) s.events = [];
         if (!s.lastResurface) s.lastResurface = 0;
         if (!s.errors) s.errors = [];
+        if (!s.thresholds) s.thresholds = [];
+        if (!s.frictionLog) s.frictionLog = [];
         return s;
       }
     } catch(e) {}
@@ -50,9 +52,12 @@
   let state = loadState();
   if (!state.errors) state.errors = [];
   if (!state.lastNotificationTs) state.lastNotificationTs = 0;
+  if (!state.thresholds) state.thresholds = [];
+  if (!state.frictionLog) state.frictionLog = [];
   let currentItemId = null;
   let currentGold = null;
   let pendingArchiveRelease = null; // index of archive item awaiting release confirmation
+  let pendingMap = ''; // map type selected in release modal
 
   // ═══════════════════════════════════════════════
   //  ERROR TRACKING
@@ -150,6 +155,10 @@
   };
 
   const logContent = $('logContent');
+  const bodyCheckInput = $('bodyCheckInput');
+  const modalMapSelect = $('modalMapSelect');
+  const modalMapOptions = $('modalMapOptions');
+  const archiveMapFilter = $('archiveMapFilter');
   const restMessage = $('restMessage');
   const restHint = $('restHint');
   const emptyMessage = $('emptyMessage');
@@ -531,6 +540,43 @@
   navBtns.log.addEventListener('click', () => { showView('log'); renderLog(); });
 
   // ═══════════════════════════════════════════════
+  //  MAP SELECTION (release modal)
+  // ═══════════════════════════════════════════════
+  function resetMapButtons() {
+    if (!modalMapOptions) return;
+    modalMapOptions.querySelectorAll('.modal-map-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.map === '');
+    });
+    pendingMap = '';
+  }
+
+  if (modalMapOptions) {
+    modalMapOptions.addEventListener('click', (e) => {
+      const btn = e.target.closest('.modal-map-btn');
+      if (!btn) return;
+      modalMapOptions.querySelectorAll('.modal-map-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      pendingMap = btn.dataset.map || '';
+    });
+  }
+
+  // ═══════════════════════════════════════════════
+  //  ARCHIVE MAP FILTER
+  // ═══════════════════════════════════════════════
+  let archiveMapQuery = '';
+
+  if (archiveMapFilter) {
+    archiveMapFilter.addEventListener('click', (e) => {
+      const btn = e.target.closest('.archive-map-filter-btn');
+      if (!btn) return;
+      archiveMapFilter.querySelectorAll('.archive-map-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      archiveMapQuery = btn.dataset.map || '';
+      renderArchive();
+    });
+  }
+
+  // ═══════════════════════════════════════════════
   //  CAPTURE
   // ═══════════════════════════════════════════════
   function updateCaptureState() {
@@ -909,6 +955,7 @@
     if (item.opened) promptType = 'digested';
     reflectPrompt.textContent = randomPrompt(promptType);
     reflectInput.value = '';
+    if (bodyCheckInput) bodyCheckInput.value = '';
     alchemizeBtn.disabled = true;
     showView('reflect');
 
@@ -940,6 +987,7 @@
       id: item.id,
       matter: item.text,
       reflection: reflection,
+      bodyCheck: bodyCheckInput ? bodyCheckInput.value.trim() : '',
       created: item.created,
       transmuted: Date.now(),
       type: item.type,
@@ -999,6 +1047,8 @@
     releaseModal.classList.remove('active');
     pendingArchiveRelease = null;
     modalKeep.style.display = '';
+    if (modalMapSelect) modalMapSelect.classList.remove('visible');
+    resetMapButtons();
     if (modalTrigger && modalTrigger.focus) { modalTrigger.focus(); modalTrigger = null; }
   }
 
@@ -1010,6 +1060,8 @@
       modalCost.textContent = 'This item has cost you ' + cost + ' of metabolic attention';
     }
     modalKeep.style.display = '';
+    resetMapButtons();
+    if (modalMapSelect) modalMapSelect.classList.add('visible');
     releaseModal.classList.add('active');
     modalKeep.focus();
   });
@@ -1078,7 +1130,7 @@
   modalKeep.addEventListener('click', () => {
     if (!currentGold) return;
 
-    const archiveItem = { ...currentGold, archived: Date.now() };
+    const archiveItem = { ...currentGold, archived: Date.now(), map: pendingMap || '', bodyCheck: currentGold.bodyCheck || '' };
     state.archive.unshift(archiveItem);
     state.stats.totalKept++;
     logEvent('keep');
@@ -1262,6 +1314,9 @@
         (item.reflection && item.reflection.toLowerCase().includes(archiveQuery))
       );
     }
+    if (archiveMapQuery) {
+      items = items.filter(({ item }) => (item.map || '') === archiveMapQuery);
+    }
     if (!archiveSortNewest) {
       items = items.slice().reverse();
     }
@@ -1305,11 +1360,16 @@
           ? `<div class="archive-checkbox ${archiveSelected.has(idx) ? 'checked' : ''}">&#x25C9;</div>`
           : '';
 
+        const mapTag = item.map ? `<div class="archive-item-map">${escapeHtml(item.map)}</div>` : '';
+        const bodyCheckTag = item.bodyCheck ? `<div class="archive-item-body-check">${escapeHtml(item.bodyCheck)}</div>` : '';
+
         el.innerHTML = `
           ${checkboxHtml}
+          ${mapTag}
           <div class="archive-item-matter">${renderMatterHtml(item.matter)}</div>
           ${richHtml}
           <div class="archive-item-reflection">${escapeHtml(item.reflection)}</div>
+          ${bodyCheckTag}
           <div class="archive-item-meta">
             <span class="archive-item-date">${dateStr}</span>
             <div class="archive-item-actions">
@@ -1335,6 +1395,8 @@
           const capturedDate = new Date(item.created).toISOString().slice(0, 10);
           const transmutedDate = new Date(item.transmuted).toISOString().slice(0, 10);
           let copyText = `---\ncaptured: ${capturedDate}\ntransmuted: ${transmutedDate}\nsource: alchemy\n`;
+          if (item.map) copyText += `map: ${item.map}\n`;
+          if (item.bodyCheck) copyText += `body: ${item.bodyCheck}\n`;
           if (item.fileName) copyText += `attachment: "${item.fileName}"\n`;
           copyText += `---\n\n> ${item.matter.replace(/\n/g, '\n> ')}\n\n${item.reflection}`;
           navigator.clipboard.writeText(copyText).then(() => {
@@ -1790,9 +1852,84 @@
     if (notifyBtn) {
       notifyBtn.addEventListener('click', () => {
         Notification.requestPermission().then(perm => {
-          renderLog(); // re-render to reflect new state
+          renderLog();
           if (perm === 'granted') showToast('Decay alerts enabled');
         });
+      });
+    }
+
+    // Append threshold section
+    const thresholdSection = document.createElement('div');
+    thresholdSection.className = 'log-section';
+    const recentThresholds = (state.thresholds || []).slice(-3).reverse();
+    thresholdSection.innerHTML = `
+      <div class="log-section-title">Weekly Threshold</div>
+      <p class="log-prose" style="margin-bottom:10px; font-size:0.88rem;">What shifted this week?</p>
+      <textarea class="log-threshold-input" id="thresholdInput" rows="3" placeholder="not what happened — what changed in how you see something"></textarea>
+      <button class="log-submit-btn" id="thresholdSubmit">Record</button>
+      ${recentThresholds.length > 0 ? `
+        <div class="log-entry-list">
+          ${recentThresholds.map(t => `
+            <div class="log-entry-item">
+              <span class="log-entry-date">${new Date(t.ts).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+              ${escapeHtml(t.text)}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `;
+    logContent.appendChild(thresholdSection);
+
+    document.getElementById('thresholdSubmit').addEventListener('click', () => {
+      const input = document.getElementById('thresholdInput');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+      state.thresholds.push({ ts: Date.now(), text });
+      if (state.thresholds.length > 52) state.thresholds = state.thresholds.slice(-52); // keep ~1 year
+      saveState();
+      input.value = '';
+      showToast('Threshold recorded');
+      renderLog();
+    });
+
+    // Append friction log section
+    const frictionSection = document.createElement('div');
+    frictionSection.className = 'log-section';
+    const recentFriction = (state.frictionLog || []).slice(-5).reverse();
+    frictionSection.innerHTML = `
+      <div class="log-section-title">Friction Log</div>
+      <p class="log-prose" style="margin-bottom:10px; font-size:0.88rem;">Where were you using this to avoid something?</p>
+      <input class="log-friction-input" id="frictionInput" type="text" placeholder="one line — catch the avoidance" />
+      <button class="log-submit-btn" id="frictionSubmit" style="margin-top:8px;">Log it</button>
+      ${recentFriction.length > 0 ? `
+        <div class="log-entry-list">
+          ${recentFriction.map(f => `
+            <div class="log-entry-item">
+              <span class="log-entry-date">${new Date(f.ts).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+              ${escapeHtml(f.text)}
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `;
+    logContent.appendChild(frictionSection);
+
+    document.getElementById('frictionSubmit').addEventListener('click', () => {
+      const input = document.getElementById('frictionInput');
+      const text = input ? input.value.trim() : '';
+      if (!text) return;
+      state.frictionLog.push({ ts: Date.now(), text });
+      if (state.frictionLog.length > 200) state.frictionLog = state.frictionLog.slice(-200);
+      saveState();
+      input.value = '';
+      showToast('Friction logged');
+      renderLog();
+    });
+
+    const frictionInputEl = document.getElementById('frictionInput');
+    if (frictionInputEl) {
+      frictionInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('frictionSubmit').click(); }
       });
     }
   }
