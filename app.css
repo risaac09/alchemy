@@ -2302,3 +2302,145 @@
     display: block;
     margin-bottom: 3px;
   }
+
+  /* ============================================================
+     TYPOGRAPHIC REFINEMENTS v1.2.1
+     Principle: mono only for true data (timestamps, counts).
+     Everything else: serif, sentence case, human scale.
+     ============================================================ */
+
+  /* --- Nav tabs: serif, lowercase, dot indicator --- */
+  .nav button {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    padding: 10px 8px 14px;
+  }
+
+  /* --- Section labels --- */
+  .capture-label,
+  .base-matter-label,
+  .gold-label,
+  .reflect-section-label,
+  .archive-sort-label,
+  .log-section-label,
+  .empty-state .empty-hint,
+  .rest-state .rest-hint {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    text-transform: none;
+  }
+
+  .base-matter-label { color: var(--rust); opacity: 0.85; }
+  .gold-label { color: var(--amber); opacity: 0.85; font-style: normal; }
+
+  /* --- Buttons: serif, sentence case, softer radius --- */
+  .capture-btn,
+  .capture-attach-btn,
+  .reflect-back,
+  .release-btn,
+  .modal-letgo,
+  .modal-cancel {
+    font-family: var(--font-serif);
+    text-transform: none;
+    letter-spacing: 0.01em;
+  }
+
+  .capture-btn {
+    font-size: 0.95rem;
+    border-radius: 4px;
+    padding: 10px 28px;
+  }
+
+  .capture-attach-btn {
+    font-size: 0.85rem;
+    border-radius: 4px;
+  }
+
+  .reflect-back {
+    font-size: 0.85rem;
+    letter-spacing: 0.01em;
+  }
+
+  .release-btn {
+    font-size: 0.85rem;
+    font-style: italic;
+    letter-spacing: 0.01em;
+    opacity: 0.45;
+  }
+
+  .modal-letgo {
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+
+  .modal-cancel {
+    font-size: 0.8rem;
+    letter-spacing: 0.01em;
+  }
+
+  /* --- Footer: italic serif, not a terminal readout --- */
+  footer p {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.85rem;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--parchment-dim);
+    opacity: 0.4;
+  }
+
+  /* --- Tape counter: quieter, no VCR energy --- */
+  .tape-counter {
+    font-size: 0.55rem;
+    letter-spacing: 0.04em;
+    opacity: 0.35;
+  }
+
+  /* --- Ascendency label: gauge alone tells the story --- */
+  .ascendency-label { display: none; }
+
+  /* --- Cycle glyph: single typographic phase mark --- */
+  .cycle-glyph {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.75rem;
+    letter-spacing: 0;
+    color: var(--parchment-dim);
+    opacity: 0.5;
+  }
+
+  /* --- Cassette: remove spoke clutter, soften the reels --- */
+  .reel-spoke { display: none; }
+  .reel-inner { border-color: rgba(77, 73, 68, 0.4); }
+  .reel { border-color: rgba(77, 73, 68, 0.5); border-width: 1px; }
+  .reel-fill { border-width: 0.5px; }
+
+  /* --- Capacity label: mono is fine but quieter --- */
+  .capacity-label {
+    font-size: 0.55rem;
+    opacity: 0.45;
+    letter-spacing: 0.04em;
+  }
+
+  /* --- Inbox hint labels: serif --- */
+  .inbox-item-settle,
+  .settle-badge,
+  .inbox-settle-hint {
+    font-family: var(--font-serif);
+    text-transform: none;
+    letter-spacing: 0.01em;
+    font-style: italic;
+  }
+
+
+  /* --- Cassette: retired in favor of capacity bar ---
+     The 7-slot capacity bar communicates fill state more legibly.
+     The cassette visualization is hidden but DOM stays intact for JS. */
+  .cassette { display: none; }
+
