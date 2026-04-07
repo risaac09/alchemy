@@ -29,14 +29,18 @@
         if (!s.errors) s.errors = [];
         if (!s.thresholds) s.thresholds = [];
         if (!s.frictionLog) s.frictionLog = [];
+        if (!s.firstOpenDate) s.firstOpenDate = null;
+        if (!s.lastActiveDate) s.lastActiveDate = null;
         return s;
       }
     } catch(e) {}
-    return { inbox: [], archive: [], stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: 0 };
+    return { inbox: [], archive: [], stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: 0, firstOpenDate: null, lastActiveDate: null };
   }
 
   function logEvent(type, meta) {
-    state.events.push({ type, ts: Date.now(), ...meta });
+    const now = Date.now();
+    state.events.push({ type, ts: now, ...meta });
+    state.lastActiveDate = now;
     // Keep last 200 events
     if (state.events.length > 200) state.events = state.events.slice(-200);
   }
@@ -54,6 +58,8 @@
   if (!state.lastNotificationTs) state.lastNotificationTs = 0;
   if (!state.thresholds) state.thresholds = [];
   if (!state.frictionLog) state.frictionLog = [];
+  if (!state.firstOpenDate) { state.firstOpenDate = Date.now(); saveState(); }
+  if (!state.lastActiveDate) state.lastActiveDate = null;
   let currentItemId = null;
   let currentGold = null;
   let pendingArchiveRelease = null; // index of archive item awaiting release confirmation
@@ -1844,6 +1850,26 @@
         ${('Notification' in window && Notification.permission === 'default') ?
           '<button class="log-notify-btn" id="logNotifyBtn">Enable decay alerts</button>' : ''}
       </div>
+
+      ${state.firstOpenDate ? (() => {
+        const daysSinceFirst = Math.floor((Date.now() - state.firstOpenDate) / 86400000);
+        const lastActive = state.lastActiveDate
+          ? Math.floor((Date.now() - state.lastActiveDate) / 86400000)
+          : null;
+        const activeDays = new Set(
+          state.events.map(e => new Date(e.ts).toDateString())
+        ).size;
+        return `
+        <div class="log-section">
+          <div class="log-section-title">Usage Signal</div>
+          <p class="log-prose">
+            First opened <strong>${daysSinceFirst === 0 ? 'today' : daysSinceFirst + (daysSinceFirst === 1 ? ' day ago' : ' days ago')}</strong>.
+            Active on <strong>${activeDays}</strong> day${activeDays !== 1 ? 's' : ''} total.
+            ${lastActive !== null ? `Last action <strong>${lastActive === 0 ? 'today' : lastActive + (lastActive === 1 ? ' day ago' : ' days ago')}</strong>.` : ''}
+          </p>
+          <p class="log-prose" style="font-size:0.78rem; margin-top:4px;">Export your data to preserve this baseline.</p>
+        </div>`;
+      })() : ''}
 
       <div class="log-version">v${VERSION}</div>
     `;
