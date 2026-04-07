@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#2D2A26"/>
+  <!-- Outer reel -->
+  <circle cx="256" cy="236" r="140" fill="none" stroke="#4D4944" stroke-width="3"/>
+  <!-- Inner reel -->
+  <circle cx="256" cy="236" r="56" fill="none" stroke="#4D4944" stroke-width="2"/>
+  <!-- Amber fill ring (the tape) -->
+  <circle cx="256" cy="236" r="98" fill="none" stroke="rgba(255,191,0,0.6)" stroke-width="18"/>
+  <!-- Spokes -->
+  <line x1="256" y1="180" x2="256" y2="292" stroke="#4D4944" stroke-width="1.5"/>
+  <line x1="207" y1="208" x2="305" y2="264" stroke="#4D4944" stroke-width="1.5"/>
+  <line x1="207" y1="264" x2="305" y2="208" stroke="#4D4944" stroke-width="1.5"/>
+  <!-- Center dot -->
+  <circle cx="256" cy="236" r="6" fill="#FFBF00" opacity="0.8"/>
+  <!-- Text -->
+  <text x="256" y="434" text-anchor="middle" font-family="Georgia, serif" font-size="52" font-weight="500" fill="#E6E2D3" letter-spacing="6">ALCHEMY</text>
+</svg>

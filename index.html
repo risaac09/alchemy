@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alchemy</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2D2A26">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alchemy">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <h1>Alche<span>m</span>y</h1>
+      <div class="cycle-glyph" id="cycleGlyph" aria-label="Adaptive cycle phase" role="img">
+        r
+        <span class="cycle-tooltip" id="cycleTooltip">Exploitation — rapid growth</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="tape-counter" id="tapeCounter">000</div>
+      <div class="ascendency-gauge" title="Ascendency — keep:release ratio" role="meter" aria-label="Ascendency" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
+        <div class="ascendency-fill" id="ascendencyFill" style="width: 40%"></div>
+      </div>
+      <div class="ascendency-label" id="ascendencyLabel">40% asc</div>
+    </div>
+  </header>
+
+  <!-- CASSETTE -->
+  <div class="cassette">
+    <div class="reel reel-left">
+      <div class="reel-fill" id="reelLeft"></div>
+      <div class="reel-inner">
+        <div class="reel-spoke"></div>
+        <div class="reel-spoke"></div>
+        <div class="reel-spoke"></div>
+      </div>
+    </div>
+    <div class="tape-path"></div>
+    <div class="reel reel-right">
+      <div class="reel-fill" id="reelRight"></div>
+      <div class="reel-inner">
+        <div class="reel-spoke"></div>
+        <div class="reel-spoke"></div>
+        <div class="reel-spoke"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPACITY BAR -->
+  <div class="capacity-bar">
+    <div class="capacity-slots" id="capacitySlots"></div>
+    <div class="capacity-label" id="capacityLabel">0/7</div>
+    <div class="fading-indicator" id="fadingIndicator"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav" role="tablist" aria-label="Main navigation">
+    <button class="active" data-view="inbox" id="navInbox" role="tab" aria-selected="true" aria-controls="viewInbox">Inbox<span class="tab-count" id="inboxCount"></span></button>
+    <button data-view="archive" id="navArchive" role="tab" aria-selected="false" aria-controls="viewArchive">Archive<span class="tab-count" id="archiveCount"></span></button>
+    <button data-view="log" id="navLog" role="tab" aria-selected="false" aria-controls="viewLog">Log</button>
+  </nav>
+
+  <!-- INBOX VIEW -->
+  <div class="view active" id="viewInbox" role="tabpanel" aria-labelledby="navInbox">
+    <div class="capture-area" id="captureArea">
+      <div class="drop-zone-overlay" id="dropOverlay">
+        <span class="drop-sigil">◇</span>
+        <span>Drop base matter here</span>
+      </div>
+      <label class="capture-label" for="captureInput">Base Matter</label>
+      <textarea
+        class="capture-input"
+        id="captureInput"
+        placeholder="A thought, a link, a half-formed hunch..."
+        rows="3"
+      ></textarea>
+      <div class="capture-attachment" id="captureAttachment">
+        <span class="capture-attachment-icon" id="attachIcon"></span>
+        <img class="capture-attachment-thumb" id="attachThumb" style="display:none" />
+        <div class="capture-attachment-info">
+          <div class="capture-attachment-name" id="attachName"></div>
+          <div class="capture-attachment-size" id="attachSize"></div>
+        </div>
+        <button class="capture-attachment-remove" id="attachRemove" aria-label="Remove attachment">&times;</button>
+      </div>
+      <div class="capture-footer">
+        <span class="capacity-warning" id="capacityWarning">The tape is full — release before capturing more</span>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button class="capture-attach-btn" id="attachBtn">+ file</button>
+          <button class="capture-btn" id="captureBtn">Inhale</button>
+        </div>
+      </div>
+      <input type="file" id="fileInput" style="display:none" accept="image/*,.pdf,.txt,.md,.csv,.json,.html,.xml,.rtf,.doc,.docx" />
+    </div>
+
+    <div class="inbox-list" id="inboxList"></div>
+
+    <div class="rest-state" id="restState" style="display:none;">
+      <div class="donut-ring">
+        <div class="donut-hole"></div>
+      </div>
+      <p id="restMessage">The tape is at rest. So are you.</p>
+      <span class="rest-hint" id="restHint">The hole at the center is not emptiness — it is structure</span>
+    </div>
+
+    <div class="empty-state" id="inboxEmpty" style="display:none;">
+      <p id="emptyMessage">The void is currently quiet. Add some base matter.</p>
+      <span class="empty-hint" id="emptyHint">Nothing is also something</span>
+    </div>
+  </div>
+
+  <!-- REFLECT VIEW -->
+  <div class="view" id="viewReflect">
+    <div class="reflect-view">
+      <button class="reflect-back" id="reflectBack">Return to inbox</button>
+
+      <div class="base-matter-display">
+        <div class="base-matter-label">Base Matter</div>
+        <div class="base-matter-content" id="reflectMatter"></div>
+        <div id="reflectMatterRich"></div>
+      </div>
+
+      <p class="reflect-prompt" id="reflectPrompt"></p>
+
+      <div class="reflect-input-wrap">
+        <textarea
+          class="reflect-input"
+          id="reflectInput"
+          placeholder="What does this actually mean to you?"
+        ></textarea>
+      </div>
+
+      <div class="reflect-actions">
+        <button class="alchemize-btn" id="alchemizeBtn" disabled>Alchemize</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOLD VIEW -->
+  <div class="view" id="viewGold">
+    <button class="reflect-back" id="goldBack">Return to inbox</button>
+
+    <div class="gold-result" id="goldResult">
+      <div class="gold-divider">· · · transmutation complete · · ·</div>
+
+      <div class="gold-combined" id="goldCombined">
+        <div class="gold-label">Gold</div>
+        <div class="gold-matter" id="goldMatter"></div>
+        <div id="goldMatterRich"></div>
+        <div class="gold-reflection" id="goldReflection"></div>
+      </div>
+
+      <div style="display:flex; justify-content:center;">
+        <button class="release-btn" id="releaseBtn">release</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHIVE VIEW -->
+  <div class="view" id="viewArchive" role="tabpanel" aria-labelledby="navArchive">
+    <div class="archive-header">
+      <div class="archive-controls">
+        <input type="search" class="archive-search" id="archiveSearch" placeholder="Search gold..." />
+        <button class="archive-sort-btn" id="archiveSortBtn" title="Toggle sort order">newest</button>
+        <button class="archive-select-btn" id="archiveSelectBtn" title="Select items for bulk release">select</button>
+      </div>
+      <span class="archive-carrying-cost" id="archiveCarryingCost"></span>
+    </div>
+    <div class="bulk-release-bar" id="bulkReleaseBar" style="display:none;">
+      <span class="bulk-release-count" id="bulkReleaseCount">0 selected</span>
+      <button class="bulk-release-btn" id="bulkReleaseBtn" disabled>Release selected</button>
+      <button class="bulk-cancel-btn" id="bulkCancelBtn">cancel</button>
+    </div>
+    <div class="archive-list" id="archiveList"></div>
+    <div class="empty-state" id="archiveEmpty" style="display:none;">
+      <p>No gold yet. The furnace awaits your attention.</p>
+      <span class="empty-hint">Transformation takes time</span>
+    </div>
+    <div class="data-actions">
+      <button class="data-btn" id="exportBtn">Export</button>
+      <button class="data-btn" id="importBtn">Import</button>
+      <input type="file" id="importFile" style="display:none" accept=".json" />
+    </div>
+  </div>
+
+  <!-- LOG VIEW -->
+  <div class="view" id="viewLog" role="tabpanel" aria-labelledby="navLog">
+    <div class="log-view" id="logContent"></div>
+
+    <div class="bookmarklet-section">
+      <div class="bookmarklet-label">Capture from anywhere</div>
+      <a class="bookmarklet-link" id="bookmarkletLink" href="#">&#x2B21; Inhale to Alchemy</a>
+      <div class="bookmarklet-hint">Drag this to your bookmarks bar. Captures selected text + URL.</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Information has a metabolism</p>
+  </footer>
+</div>
+
+<!-- RELEASE MODAL -->
+<div class="modal-overlay" id="releaseModal" role="dialog" aria-modal="true" aria-labelledby="releaseModalTitle">
+  <div class="modal" id="releaseModalInner">
+    <div class="modal-sigil">&#x25CE;</div>
+    <h2 id="releaseModalTitle">The moment of release</h2>
+    <p>Every thing you keep costs you something to carry. Every thing you release makes room for what comes next.</p>
+    <div class="modal-cost" id="modalCost"></div>
+    <div class="modal-actions">
+      <button class="modal-keep" id="modalKeep">Keep — move to archive</button>
+      <button class="modal-letgo" id="modalLetGo">Let go — return it to the void</button>
+      <button class="modal-cancel" id="modalCancel">not yet</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIRST RUN -->
+<div class="onboarding-overlay" id="onboarding">
+  <div class="onboarding-content">
+    <h2>Alchemy</h2>
+    <p>An antechamber for what you consume.</p>
+    <p>Capture anything. Wait. Reflect. Transform or release.</p>
+    <p class="onboarding-rules">7 items max. 72h decay. Nothing is permanent.</p>
+    <p class="onboarding-hint">Press <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> to switch views, <kbd>n</kbd> to capture.</p>
+    <button class="onboarding-begin" id="onboardingBegin">Begin</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" aria-live="polite" role="status"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

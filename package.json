@@ -1,0 +1,23 @@
+{
+  "name": "alchemy",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/risaac09/alchemy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/risaac09/alchemy/issues"
+  },
+  "homepage": "https://github.com/risaac09/alchemy#readme",
+  "description": "",
+  "devDependencies": {
+    "jsdom": "^29.0.1"
+  }
+}
