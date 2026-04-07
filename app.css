@@ -2444,3 +2444,74 @@
      The cassette visualization is hidden but DOM stays intact for JS. */
   .cassette { display: none; }
 
+
+  /* ============================================================
+     UX IMPROVEMENTS v1.2.2
+     ============================================================ */
+
+  /* --- #1: Focused views (reflect/gold) — hide chrome, start at top --- */
+  .shell--focused header,
+  .shell--focused .capacity-bar,
+  .shell--focused .nav {
+    display: none;
+  }
+
+  .shell--focused .view.active {
+    padding-top: 32px;
+  }
+
+  /* --- #2: Compact capture when inbox has items --- */
+  .capture-area.capture-compact .capture-label { display: none; }
+
+  .capture-area.capture-compact .capture-input {
+    min-height: 38px;
+    height: 38px;
+    overflow: hidden;
+    resize: none;
+    transition: height 0.2s ease, min-height 0.2s ease;
+  }
+
+  .capture-area.capture-compact .capture-input:focus {
+    min-height: 100px;
+    height: auto;
+    overflow: auto;
+    resize: vertical;
+  }
+
+  /* --- #3: Somatic pulse label and item type badges --- */
+  .body-check-label {
+    font-family: var(--font-serif) !important;
+    font-style: italic !important;
+    text-transform: none !important;
+    letter-spacing: 0.01em !important;
+    font-size: 0.8rem !important;
+    color: var(--parchment-dim);
+  }
+
+  .inbox-item-type {
+    font-family: var(--font-serif) !important;
+    font-style: italic !important;
+    text-transform: none !important;
+    letter-spacing: 0.01em !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* --- #6: Tape counter — label format (now shows "N released") --- */
+  .tape-counter {
+    font-family: var(--font-serif);
+    font-size: 0.6rem;
+    letter-spacing: 0.01em;
+    opacity: 0.3;
+    font-style: italic;
+  }
+
+  /* --- #5: Onboarding tagline --- */
+  .onboarding-tagline {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--parchment-dim);
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+

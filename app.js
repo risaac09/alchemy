@@ -87,6 +87,7 @@
   // ═══════════════════════════════════════════════
   const $ = id => document.getElementById(id);
 
+  const shell = document.querySelector('.shell');
   const captureArea = $('captureArea');
   const captureInput = $('captureInput');
   const captureBtn = $('captureBtn');
@@ -375,6 +376,18 @@
 
   // Render text with clickable links (match on raw text, then escape non-URL parts)
   // When cooled=false, URLs render as plain text (not clickable)
+  function urlDisplayText(url) {
+    try {
+      const u = new URL(url);
+      let display = u.hostname.replace(/^www\./, '');
+      if (u.pathname && u.pathname !== '/') {
+        const path = u.pathname.replace(/\/$/, '');
+        display += path.length > 28 ? path.slice(0, 28) + '…' : path;
+      }
+      return display;
+    } catch(e) { return url.length > 40 ? url.slice(0, 40) + '…' : url; }
+  }
+
   function renderMatterHtml(text, cooled) {
     if (cooled === undefined) cooled = true;
     const parts = [];
@@ -387,9 +400,9 @@
       }
       const url = match[0];
       if (cooled) {
-        parts.push(`<a href="${escapeHtml(url)}" class="matter-link" target="_blank" rel="noopener">${escapeHtml(url)}</a>`);
+        parts.push(`<a href="${escapeHtml(url)}" class="matter-link" target="_blank" rel="noopener">${escapeHtml(urlDisplayText(url))}</a>`);
       } else {
-        parts.push(`<span class="matter-link-cooling">${escapeHtml(url)}</span>`);
+        parts.push(`<span class="matter-link-cooling">${escapeHtml(urlDisplayText(url))}</span>`);
       }
       lastIndex = re.lastIndex;
     }
@@ -539,6 +552,8 @@
     views[name].classList.add('active');
     Object.values(navBtns).forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
     if (navBtns[name]) { navBtns[name].classList.add('active'); navBtns[name].setAttribute('aria-selected', 'true'); }
+    // Focused views (reflect/gold) hide the chrome so content starts at top
+    shell.classList.toggle('shell--focused', name === 'reflect' || name === 'gold');
   }
 
   navBtns.inbox.addEventListener('click', () => { showView('inbox'); renderInbox(); });
@@ -590,6 +605,8 @@
     captureInput.disabled = full;
     captureBtn.disabled = full;
     capacityWarning.classList.toggle('visible', full);
+    // Compact capture when items exist — textarea shrinks, expands on focus
+    captureArea.classList.toggle('capture-compact', state.inbox.length > 0);
   }
 
   captureBtn.addEventListener('click', () => {
@@ -1529,8 +1546,8 @@
     inboxCount.textContent = state.inbox.length > 0 ? ` ${state.inbox.length}` : '';
     archiveCount.textContent = state.archive.length > 0 ? ` ${state.archive.length}` : '';
 
-    const total = state.inbox.length + state.archive.length;
-    tapeCounter.textContent = String(total).padStart(3, '0');
+    const total = state.stats.totalKept + state.stats.totalReleased;
+    if (tapeCounter) tapeCounter.textContent = total > 0 ? `${total} released` : '';
   }
 
   function updateReels() {
