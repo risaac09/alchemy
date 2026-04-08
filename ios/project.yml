@@ -1,0 +1,52 @@
+name: Alchemy
+options:
+  bundleIdPrefix: com.rubinsteinproductions
+  deploymentTarget:
+    iOS: "16.0"
+
+targets:
+  Alchemy:
+    type: application
+    platform: iOS
+    sources:
+      - path: Alchemy
+        excludes:
+          - "**/.DS_Store"
+      - path: ../index.html
+        buildPhase: resources
+        group: Web
+      - path: ../app.js
+        buildPhase: resources
+        group: Web
+      - path: ../app.css
+        buildPhase: resources
+        group: Web
+      - path: ../sw.js
+        buildPhase: resources
+        group: Web
+      - path: ../manifest.json
+        buildPhase: resources
+        group: Web
+      - path: ../icon-192.png
+        buildPhase: resources
+        group: Web
+      - path: ../icon-512.png
+        buildPhase: resources
+        group: Web
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.rubinsteinproductions.alchemy
+      PRODUCT_NAME: Alchemy
+      SWIFT_VERSION: "5.9"
+      TARGETED_DEVICE_FAMILY: "1,2"
+      INFOPLIST_FILE: Alchemy/Info.plist
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      # Web files land in a "Web" subfolder inside the bundle
+      WRAPPER_EXTENSION: app
+    preBuildScripts:
+      - name: Copy web files into Web/ subfolder
+        script: |
+          WEB_DIR="${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Web"
+          mkdir -p "$WEB_DIR"
+          for f in index.html app.js app.css sw.js manifest.json icon-192.png icon-512.png; do
+            cp "${SRCROOT}/../$f" "$WEB_DIR/" 2>/dev/null || true
+          done
