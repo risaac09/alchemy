@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alchemy</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+    :root {
+      --bark: #2D2A26;
+      --bark-light: #3D3935;
+      --bark-lighter: #4D4944;
+      --parchment: #E6E2D3;
+      --parchment-dim: #C4C0B3;
+      --amber: #FFBF00;
+      --amber-dim: rgba(255,191,0,0.6);
+      --amber-glow: rgba(255,191,0,0.10);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      background: var(--bark);
+      color: var(--parchment);
+      width: 320px;
+      min-height: 200px;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--bark-lighter);
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--parchment);
+    }
+
+    h1 span { color: var(--amber-dim); }
+
+    .tagline {
+      font-size: 0.7rem;
+      font-style: italic;
+      color: var(--parchment-dim);
+      opacity: 0.6;
+    }
+
+    .page-preview {
+      background: rgba(230,226,211,0.06);
+      border-left: 2px solid var(--amber-dim);
+      border-radius: 0 3px 3px 0;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+    }
+
+    .page-title {
+      font-size: 0.9rem;
+      color: var(--parchment);
+      line-height: 1.4;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .page-url {
+      font-size: 0.7rem;
+      color: var(--parchment-dim);
+      opacity: 0.6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .selection-wrap {
+      margin-bottom: 14px;
+    }
+
+    .selection-label {
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--parchment-dim);
+      opacity: 0.7;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 64px;
+      background: rgba(230,226,211,0.06);
+      border: 1px solid var(--bark-lighter);
+      border-radius: 3px;
+      padding: 10px 12px;
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--parchment);
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea::placeholder { color: var(--bark-lighter); font-style: italic; }
+    textarea:focus { border-color: var(--amber-dim); }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-inhale {
+      flex: 1;
+      background: var(--amber-glow);
+      border: 1px solid var(--amber-dim);
+      color: var(--amber);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 1rem;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-inhale:hover { background: rgba(255,191,0,0.18); }
+    .btn-inhale:active { background: var(--amber); color: var(--bark); }
+
+    .btn-open {
+      background: none;
+      border: 1px solid var(--bark-lighter);
+      color: var(--parchment-dim);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 0.8rem;
+      font-style: italic;
+      padding: 10px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-open:hover { border-color: var(--parchment-dim); color: var(--parchment); }
+
+    .toast {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      font-style: italic;
+      color: var(--amber);
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+      min-height: 1.2em;
+    }
+
+    .toast.visible { opacity: 1; }
+
+    .full-badge {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      font-style: italic;
+      color: #C44D2B;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Alche<span>m</span>y</h1>
+    <span class="tagline">digest, don't hoard</span>
+  </header>
+
+  <div class="page-preview">
+    <div class="page-title" id="pageTitle">Loading…</div>
+    <div class="page-url" id="pageUrl"></div>
+  </div>
+
+  <div class="selection-wrap" id="selectionWrap" style="display:none">
+    <label class="selection-label" for="extraText">Selected text</label>
+    <textarea id="extraText" placeholder="add a note…" rows="3"></textarea>
+  </div>
+
+  <div class="selection-wrap" id="noteWrap" style="display:none">
+    <label class="selection-label" for="noteText">Add a note (optional)</label>
+    <textarea id="noteText" placeholder="what drew you here?" rows="2"></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn-inhale" id="btnInhale">Inhale</button>
+    <button class="btn-open" id="btnOpen">open app ↗</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="full-badge" id="fullBadge">tape is full — release something first</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
