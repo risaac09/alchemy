@@ -4,14 +4,16 @@
   // ═══════════════════════════════════════════════
   //  THERMODYNAMIC CONSTANTS
   // ═══════════════════════════════════════════════
-  const VERSION = '1.2.0';
-  const MAX_CAPACITY = 7;          // Cassette tape finitude
+  const VERSION = '1.3.0';
+  const BASE_MAX_CAPACITY = 7;     // Cassette tape finitude (default)
+  let MAX_CAPACITY = BASE_MAX_CAPACITY; // Mutated by diagnostic-reactive tuning
   const DECAY_MS = 72 * 3600000;   // 72 hours to full decay
   const SETTLE_MS = 30000;         // 30 seconds before item is reflectable
   const TICK_INTERVAL = 5000;      // UI refresh every 5s
   const LINK_COOLING_MS = 4 * 3600000; // 4 hours before links become clickable
   const ARCHIVE_DECAY_MS = 90 * 86400000; // 90 days archive decay
-  const RESURFACE_INTERVAL_MS = 3 * 86400000; // Re-surface one item every 3 days
+  const BASE_RESURFACE_INTERVAL_MS = 3 * 86400000; // Default: re-surface one item every 3 days
+  let RESURFACE_INTERVAL_MS = BASE_RESURFACE_INTERVAL_MS;
 
   // ═══════════════════════════════════════════════
   //  STATE
@@ -31,6 +33,7 @@
         if (!s.frictionLog) s.frictionLog = [];
         if (!s.firstOpenDate) s.firstOpenDate = null;
         if (!s.lastActiveDate) s.lastActiveDate = null;
+        if (!s.diagnostic) s.diagnostic = null;
         return s;
       }
     } catch(e) {}
@@ -54,6 +57,20 @@
   }
 
   let state = loadState();
+
+  // Diagnostic-reactive tuning. The hard rule is finitude — we never INCREASE
+  // capacity above the baseline or shorten the resurface interval. Low intake
+  // or low return-flow scores pull the constants tighter (smaller inbox, longer
+  // resurface window) so the tool matches the user's measured practice.
+  function applyDiagnosticTuning() {
+    MAX_CAPACITY = BASE_MAX_CAPACITY;
+    RESURFACE_INTERVAL_MS = BASE_RESURFACE_INTERVAL_MS;
+    const d = state.diagnostic;
+    if (!d || !d.scores) return;
+    if (d.scores.intake <= 2) MAX_CAPACITY = 5;       // cluttered intake → tighter cap
+    if (d.scores.returnFlow <= 2) RESURFACE_INTERVAL_MS = 5 * 86400000; // pipe-like → stretch window
+  }
+  applyDiagnosticTuning();
   if (!state.errors) state.errors = [];
   if (!state.lastNotificationTs) state.lastNotificationTs = 0;
   if (!state.thresholds) state.thresholds = [];
@@ -64,6 +81,9 @@
   let currentGold = null;
   let pendingArchiveRelease = null; // index of archive item awaiting release confirmation
   let pendingMap = ''; // map type selected in release modal
+  let pendingRubricKeep = false; // true while rubric form is visible after clicking Keep
+  const RUBRIC_DIMS = ['clarity', 'integrity', 'somatic', 'transmutation', 'release'];
+  let currentRubric = null;
 
   // ═══════════════════════════════════════════════
   //  ERROR TRACKING
@@ -152,17 +172,28 @@
     reflect: $('viewReflect'),
     gold: $('viewGold'),
     archive: $('viewArchive'),
-    log: $('viewLog')
+    log: $('viewLog'),
+    diagnostic: $('viewDiagnostic')
   };
 
   const navBtns = {
     inbox: $('navInbox'),
     archive: $('navArchive'),
-    log: $('navLog')
+    log: $('navLog'),
+    diagnostic: $('navDiagnostic')
   };
 
   const logContent = $('logContent');
   const bodyCheckInput = $('bodyCheckInput');
+  const vocabToggle = $('vocabToggle');
+  const vocabPanel = $('vocabPanel');
+  if (vocabToggle && vocabPanel) {
+    vocabToggle.addEventListener('click', () => {
+      const open = vocabPanel.hasAttribute('hidden') ? false : true;
+      if (open) { vocabPanel.setAttribute('hidden', ''); vocabToggle.setAttribute('aria-expanded', 'false'); vocabToggle.textContent = "can't find a word?"; }
+      else { vocabPanel.removeAttribute('hidden'); vocabToggle.setAttribute('aria-expanded', 'true'); vocabToggle.textContent = 'hide vocabulary'; }
+    });
+  }
   const modalMapSelect = $('modalMapSelect');
   const modalMapOptions = $('modalMapOptions');
   const archiveMapFilter = $('archiveMapFilter');
@@ -559,6 +590,7 @@
   navBtns.inbox.addEventListener('click', () => { showView('inbox'); renderInbox(); });
   navBtns.archive.addEventListener('click', () => { showView('archive'); renderArchive(); });
   navBtns.log.addEventListener('click', () => { showView('log'); renderLog(); });
+  navBtns.diagnostic.addEventListener('click', () => { showView('diagnostic'); renderDiagnostic(); });
 
   // ═══════════════════════════════════════════════
   //  MAP SELECTION (release modal)
@@ -1067,12 +1099,92 @@
   let modalTrigger = null;
 
   function closeModal() {
+    if (pendingRubricKeep) {
+      // Dismissed mid-rubric — archive without scores
+      commitKeep(null);
+      return;
+    }
     releaseModal.classList.remove('active');
     pendingArchiveRelease = null;
     modalKeep.style.display = '';
     if (modalMapSelect) modalMapSelect.classList.remove('visible');
     resetMapButtons();
+    resetRubricForm();
     if (modalTrigger && modalTrigger.focus) { modalTrigger.focus(); modalTrigger = null; }
+  }
+
+  function resetRubricForm() {
+    pendingRubricKeep = false;
+    currentRubric = null;
+    const modalMain = $('modalMain');
+    const modalRubric = $('modalRubric');
+    if (modalMain) modalMain.style.display = '';
+    if (modalRubric) modalRubric.style.display = 'none';
+    const noteInput = $('rubricNote');
+    if (noteInput) noteInput.value = '';
+    const rows = $('rubricRows');
+    if (rows) rows.querySelectorAll('button.selected').forEach(b => b.classList.remove('selected'));
+  }
+
+  function showRubricForm() {
+    pendingRubricKeep = true;
+    currentRubric = { clarity: null, integrity: null, somatic: null, transmutation: null, release: null };
+    const modalMain = $('modalMain');
+    const modalRubric = $('modalRubric');
+    if (modalMain) modalMain.style.display = 'none';
+    if (modalRubric) modalRubric.style.display = '';
+    const archiveBtn = $('rubricArchive');
+    if (archiveBtn) archiveBtn.focus();
+  }
+
+  function commitKeep(rubric) {
+    if (!currentGold) return;
+    const archiveItem = {
+      ...currentGold,
+      archived: Date.now(),
+      map: pendingMap || '',
+      bodyCheck: currentGold.bodyCheck || '',
+      rubric: rubric
+    };
+    state.archive.unshift(archiveItem);
+    state.stats.totalKept++;
+    logEvent('keep');
+    saveState();
+
+    currentGold = null;
+    releaseModal.classList.remove('active');
+    resetRubricForm();
+    showView('inbox');
+    renderInbox();
+    showToast('Archived — the gold is kept');
+  }
+
+  const rubricRowsEl = $('rubricRows');
+  if (rubricRowsEl) {
+    rubricRowsEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-v]');
+      if (!btn) return;
+      const scale = btn.parentElement;
+      const dim = scale.dataset.dim;
+      const val = parseInt(btn.dataset.v, 10);
+      if (!dim || !currentRubric) return;
+      currentRubric[dim] = val;
+      scale.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  }
+
+  const rubricArchiveBtn = $('rubricArchive');
+  if (rubricArchiveBtn) {
+    rubricArchiveBtn.addEventListener('click', () => {
+      const noteEl = $('rubricNote');
+      const note = noteEl ? noteEl.value.trim() : '';
+      const anyRated = RUBRIC_DIMS.some(d => currentRubric && currentRubric[d] !== null);
+      const rubric = (anyRated || note)
+        ? { ...currentRubric, note: note || null, ratedAt: Date.now() }
+        : null;
+      commitKeep(rubric);
+    });
   }
 
   releaseBtn.addEventListener('click', () => {
@@ -1133,10 +1245,14 @@
       return;
     }
 
-    // View switching: 1=inbox, 2=archive, 3=log
+    // When answering a diagnostic question, let 1-5 flow to the diagnostic's own handler
+    if (currentView === 'diagnostic' && diagState && diagState.view === 'question') return;
+
+    // View switching: 1=inbox, 2=archive, 3=log, 4=diagnostic
     if (e.key === '1') { navBtns.inbox.click(); return; }
     if (e.key === '2') { navBtns.archive.click(); return; }
     if (e.key === '3') { navBtns.log.click(); return; }
+    if (e.key === '4') { navBtns.diagnostic.click(); return; }
 
     // n = focus capture input
     if (e.key === 'n' && currentView === 'inbox') {
@@ -1152,18 +1268,7 @@
 
   modalKeep.addEventListener('click', () => {
     if (!currentGold) return;
-
-    const archiveItem = { ...currentGold, archived: Date.now(), map: pendingMap || '', bodyCheck: currentGold.bodyCheck || '' };
-    state.archive.unshift(archiveItem);
-    state.stats.totalKept++;
-    logEvent('keep');
-    saveState();
-
-    currentGold = null;
-    releaseModal.classList.remove('active');
-    showView('inbox');
-    renderInbox();
-    showToast('Archived — the gold is kept');
+    showRubricForm();
   });
 
   modalLetGo.addEventListener('click', () => {
@@ -1385,6 +1490,7 @@
 
         const mapTag = item.map ? `<div class="archive-item-map">${escapeHtml(item.map)}</div>` : '';
         const bodyCheckTag = item.bodyCheck ? `<div class="archive-item-body-check">${escapeHtml(item.bodyCheck)}</div>` : '';
+        const rubricTag = item.rubric ? `<div class="archive-item-rubric">${renderRubricLine(item.rubric)}</div>` : '';
 
         el.innerHTML = `
           ${checkboxHtml}
@@ -1393,6 +1499,7 @@
           ${richHtml}
           <div class="archive-item-reflection">${escapeHtml(item.reflection)}</div>
           ${bodyCheckTag}
+          ${rubricTag}
           <div class="archive-item-meta">
             <span class="archive-item-date">${dateStr}</span>
             <div class="archive-item-actions">
@@ -1421,6 +1528,10 @@
           if (item.map) copyText += `map: ${item.map}\n`;
           if (item.bodyCheck) copyText += `body: ${item.bodyCheck}\n`;
           if (item.fileName) copyText += `attachment: "${item.fileName}"\n`;
+          if (item.rubric) {
+            RUBRIC_DIMS.forEach(d => { if (item.rubric[d] != null) copyText += `rubric_${d}: ${item.rubric[d]}\n`; });
+            if (item.rubric.note) copyText += `rubric_note: "${item.rubric.note.replace(/"/g, '\\"')}"\n`;
+          }
           copyText += `---\n\n> ${item.matter.replace(/\n/g, '\n> ')}\n\n${item.reflection}`;
           navigator.clipboard.writeText(copyText).then(() => {
             copyBtn.textContent = 'Copied';
@@ -1529,6 +1640,13 @@
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  function renderRubricLine(r) {
+    if (!r) return '';
+    const parts = RUBRIC_DIMS.filter(d => r[d] != null).map(d => `${d} ${r[d]}`);
+    if (r.note) parts.push(`note: "${escapeHtml(r.note)}"`);
+    return parts.join(' · ');
   }
 
   function timeAgo(ts) {
@@ -1779,7 +1897,7 @@
         </div>`;
     }
 
-    const hasHistory = state.events.length > 0;
+    const hasHistory = state.events.length > 0 || !!state.diagnostic;
 
     if (!hasHistory) {
       logContent.innerHTML = `
@@ -1899,6 +2017,51 @@
           if (perm === 'granted') showToast('Decay alerts enabled');
         });
       });
+    }
+
+    // Diagnostic placement (single line, no trends)
+    if (state.diagnostic) {
+      const d = state.diagnostic;
+      const tuned = MAX_CAPACITY !== BASE_MAX_CAPACITY || RESURFACE_INTERVAL_MS !== BASE_RESURFACE_INTERVAL_MS;
+      const tuningLine = tuned
+        ? `<p class="log-prose" style="font-size:0.82rem; color:var(--parchment-dim); opacity:0.75; font-style:italic;">Reacting to your scores: inbox cap ${MAX_CAPACITY}, resurface every ${Math.round(RESURFACE_INTERVAL_MS / 86400000)} days.</p>`
+        : '';
+      const diagSec = document.createElement('div');
+      diagSec.className = 'log-section';
+      diagSec.innerHTML = `
+        <div class="log-section-title">Metabolism placement</div>
+        <p class="log-prose" style="font-size:0.88rem;">
+          <strong>${escapeHtml(d.quadrant)}</strong> — ${escapeHtml(d.summary)}.
+          <span style="color:var(--parchment-dim);opacity:0.7">Taken ${new Date(d.takenAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.</span>
+        </p>
+        ${tuningLine}
+        <button class="log-submit-btn" id="diagRetakeBtn" style="margin-top:6px;">Retake</button>
+      `;
+      logContent.appendChild(diagSec);
+      const retake = document.getElementById('diagRetakeBtn');
+      if (retake) retake.addEventListener('click', () => navBtns.diagnostic.click());
+    }
+
+    // Append recent rubric notes section (words only — no numbers, no aggregation)
+    const rubricNotes = state.archive
+      .filter(a => a.rubric && a.rubric.note && a.rubric.ratedAt)
+      .slice(0, 7);
+    if (rubricNotes.length > 0) {
+      const rubricSection = document.createElement('div');
+      rubricSection.className = 'log-section';
+      rubricSection.innerHTML = `
+        <div class="log-section-title">Recent rubrics</div>
+        <p class="log-prose" style="margin-bottom:10px; font-size:0.88rem;">What you said about the last few passages.</p>
+        <div class="log-entry-list">
+          ${rubricNotes.map(a => `
+            <div class="log-entry-item">
+              <span class="log-entry-date">${new Date(a.rubric.ratedAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+              ${escapeHtml(a.rubric.note)}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      logContent.appendChild(rubricSection);
     }
 
     // Append threshold section
@@ -2127,10 +2290,12 @@
     }
   }
 
+  const EMBED_MODE = document.body && document.body.dataset && document.body.dataset.embed === 'true';
+
   // ═══════════════════════════════════════════════
   //  PWA — Service Worker & Install
   // ═══════════════════════════════════════════════
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && !EMBED_MODE) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 
@@ -2172,7 +2337,7 @@
   const onboarding = $('onboarding');
   const onboardingBegin = $('onboardingBegin');
   if (onboarding && onboardingBegin) {
-    if (localStorage.getItem('alchemy_onboarded')) {
+    if (EMBED_MODE || localStorage.getItem('alchemy_onboarded')) {
       onboarding.classList.add('hidden');
     } else {
       onboardingBegin.addEventListener('click', () => {
@@ -2213,6 +2378,275 @@
       renderInbox();
       tickId = setInterval(tick, TICK_INTERVAL);
       manageSettleTick();
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  //  INFORMATION METABOLISM DIAGNOSTIC (6th view)
+  //  12-question assessment across 4 axes.
+  //  Absorbed from alchemy-diagnostic repo, 2026-04-23.
+  // ═══════════════════════════════════════════════════════════════
+  const DIAG_QUESTIONS = [
+    { id: 'q1', axis: 'intake', text: 'On a normal day, how much new information do you take in — articles, videos, scrolling, meetings, conversations?', options: ['Very little — under 30 minutes total', 'A modest amount — an hour or two', 'A steady stream — a few hours', 'A lot — most of the day', 'It never really stops'] },
+    { id: 'q2', axis: 'intake', text: 'When something enters your attention, how often are you the one choosing vs. something pulling you?', options: ['Almost always pulled — I react to what shows up', 'Mostly pulled', 'About half and half', 'Mostly chosen', 'Almost always chosen — I decide what to let in'] },
+    { id: 'q3', axis: 'intake', text: 'After a stretch of consuming, how do you usually feel?', options: ['Cluttered, wired, scattered', 'Slightly overloaded', 'Neutral', 'A little clearer', 'Clearer and more composed than when I started'] },
+    { id: 'q4', axis: 'transformation', text: 'When something lands — an idea, a quote, a pattern — what usually happens next?', options: ['I save it somewhere and rarely come back', 'I think about it briefly, then move on', 'I note it for possible future use', 'I write, talk, or make something with it', 'I run it through a deliberate practice'] },
+    { id: 'q5', axis: 'transformation', text: 'How often does raw material change shape in your hands — become a note, a sentence, a drawing, a new question?', options: ['Almost never', 'Occasionally', 'Sometimes', 'Often', 'Nearly everything I take in'] },
+    { id: 'q6', axis: 'transformation', text: 'When you sit with something unresolved or uncomfortable, how long can you stay with it before resolving or discarding?', options: ['Minutes at most', 'Part of a day', 'A day or two', 'Most of a week', 'Days or weeks — I let things cook'] },
+    { id: 'q7', axis: 'expression', text: 'In a typical month, how much of your output carries your voice — your framing, your questions, your angle?', options: ['Almost none — I mostly reformulate or respond to others', 'A little', 'About half', 'Most of it', 'Nearly all — I generate more than I react'] },
+    { id: 'q8', axis: 'expression', text: 'How often are you putting work out publicly — writing, speaking, posting, presenting?', options: ['Rarely or never', 'A few times a year', 'Monthly', 'Weekly', 'More than weekly'] },
+    { id: 'q9', axis: 'expression', text: 'If someone with similar skills saw your recent work, could they have made the same thing?', options: ['Yes, it\u2019s pretty interchangeable', 'Mostly', 'Some of it', 'Not really — it carries my perspective', 'No — it\u2019s unmistakably mine'] },
+    { id: 'q10', axis: 'returnFlow', text: 'Does your published or shared work come back to you — as responses, conversations, new questions, new invitations?', options: ['Almost never — it disappears', 'Occasionally', 'Sometimes', 'Usually', 'Almost always — every piece opens the next'] },
+    { id: 'q11', axis: 'returnFlow', text: 'How often do you re-encounter your own past work and let it shape what comes next?', options: ['Rarely — past work stays past', 'Occasionally', 'Sometimes', 'Often', 'Regularly — I mine my own history'] },
+    { id: 'q12', axis: 'returnFlow', text: 'If you drew the path of your information — where it enters, what happens to it, where it goes — would it look more like a pipe or a loop?', options: ['A pipe — in and out', 'Mostly pipe with small returns', 'A pipe that\u2019s starting to curve', 'A loop with leaks', 'A closed circulating torus'] }
+  ];
+
+  const diagRoot = $('diagnosticRoot');
+  let diagState = { view: 'landing', index: 0, answers: {} };
+
+  function diagMean(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
+
+  function diagComputeScores(a) {
+    const q1Inverted = 6 - a.q1;
+    const intake = diagMean([q1Inverted, a.q2, a.q3]);
+    const transformation = diagMean([a.q4, a.q5, a.q6]);
+    const expression = diagMean([a.q7, a.q8, a.q9]);
+    const returnFlow = diagMean([a.q10, a.q11, a.q12]);
+    return { intake, transformation, expression, returnFlow, volume: a.q1, circulation: diagMean([intake, transformation, expression, returnFlow]) };
+  }
+
+  function diagQuadrant(s) {
+    const hv = s.volume > 3, hc = s.circulation > 3;
+    if (hv && hc) return { name: 'Thriving', summary: 'a circulating torus' };
+    if (hv && !hc) return { name: 'Drowning', summary: 'a pipe under pressure' };
+    if (!hv && hc) return { name: 'Distilling', summary: 'a compact loop' };
+    return { name: 'Stagnant', summary: 'an idle field' };
+  }
+
+  function diagFindings(s) {
+    const out = [];
+    const deliberate = [s.transformation, s.expression, s.returnFlow];
+    if (deliberate.every(v => v >= 4) && s.intake >= 3.5) out.push('Your circulation is strong across every axis. The work here is refinement, not restructuring.');
+    if (deliberate.every(v => v <= 2) && s.volume <= 2) out.push('Your system is under-activated. Start with one axis — return flow is usually the highest leverage.');
+    if (s.returnFlow <= 2) out.push('Your system is operating as a pipe. Material enters and exits without circling back.');
+    if (s.volume >= 4 && s.transformation <= 2) out.push('Your intake is high but transformation is low — you are taking in more than you can metabolize.');
+    if (s.transformation >= 4 && s.expression <= 2) out.push('Your transformation is strong but expression is low. Material is being processed but not released.');
+    if (s.expression >= 4 && s.returnFlow <= 2) out.push('You are producing — but the work is not coming back to feed the next cycle.');
+    if (s.intake <= 2 && s.volume >= 4) out.push('A lot is getting in, but almost none of it is by choice. The filter needs building before anything else.');
+    if (s.expression <= 2 && s.transformation >= 3) out.push('You are metabolizing material privately. The next move is finding a public surface to release it.');
+    if (s.volume <= 2 && s.circulation >= 4) out.push('Low volume, high circulation. You are distilling. The risk here is starvation, not overload.');
+    const q = diagQuadrant(s);
+    out.push('Your placement: ' + q.name + ' — your information field currently shapes itself like ' + q.summary + '.');
+    return out.slice(0, 5);
+  }
+
+  function diagRecs(s) {
+    const recs = [];
+    if (s.transformation <= 2 && s.volume >= 4) recs.push({ tier: 'Sift first', body: 'Your intake is high but little is metabolizing. Before adding output, build a filter and a metabolizing rhythm — less in, slower in, more digested.' });
+    if (s.expression <= 2) recs.push({ tier: 'Release what you already have', body: 'You are holding more than you are releasing. Establish an output practice: one small, regular act of saying what you have already metabolized.' });
+    if (s.returnFlow <= 2) recs.push({ tier: 'Close the loop', body: 'Information is moving through but not returning. Build a return-flow habit — a publishing rhythm that feeds response back into your inquiry.' });
+    if (s.circulation >= 4) recs.push({ tier: 'Refine, do not restructure', body: 'You are running a torus already. Next work is longitudinal: track what circulates, notice drift, refine the rhythm — not rebuild it.' });
+    if (recs.length === 0) recs.push({ tier: 'Sit with it', body: 'Nothing is flashing red. Re-read the findings. The work now is attention, not action.' });
+    return recs.slice(0, 3);
+  }
+
+  function diagRenderTorusMap(s) {
+    const W = 340, H = 340, P = 46;
+    const iw = W - P * 2, ih = H - P * 2;
+    const cx = P + ((s.circulation - 1) / 4) * iw;
+    const cy = P + ((5 - s.volume) / 4) * ih;
+    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="diag-chart" role="img" aria-label="Placement map">
+      <rect x="${P}" y="${P}" width="${iw}" height="${ih}" fill="none" stroke="var(--parchment-ghost)" stroke-width="1"/>
+      <line x1="${P + iw/2}" y1="${P}" x2="${P + iw/2}" y2="${P + ih}" stroke="var(--parchment-ghost)" stroke-dasharray="2 4"/>
+      <line x1="${P}" y1="${P + ih/2}" x2="${P + iw}" y2="${P + ih/2}" stroke="var(--parchment-ghost)" stroke-dasharray="2 4"/>
+      <text x="${P + iw*0.25}" y="${P + ih*0.18}" class="diag-quad-label" text-anchor="middle">DROWNING</text>
+      <text x="${P + iw*0.75}" y="${P + ih*0.18}" class="diag-quad-label" text-anchor="middle">THRIVING</text>
+      <text x="${P + iw*0.25}" y="${P + ih*0.88}" class="diag-quad-label" text-anchor="middle">STAGNANT</text>
+      <text x="${P + iw*0.75}" y="${P + ih*0.88}" class="diag-quad-label" text-anchor="middle">DISTILLING</text>
+      <text x="${W/2}" y="${H - 12}" class="diag-axis-label" text-anchor="middle">CIRCULATION →</text>
+      <text x="14" y="${H/2}" class="diag-axis-label" text-anchor="middle" transform="rotate(-90, 14, ${H/2})">VOLUME →</text>
+      <circle cx="${cx}" cy="${cy}" r="28" fill="var(--amber-glow)"/>
+      <circle cx="${cx}" cy="${cy}" r="6" fill="var(--amber)"/>
+      <circle cx="${cx}" cy="${cy}" r="2" fill="var(--bark)"/>
+    </svg>`;
+  }
+
+  function diagRenderRadar(s) {
+    const W = 380, H = 340, cx = W / 2, cy = H / 2, R = 110;
+    const axes = [
+      { label: 'INTAKE', value: s.intake, angle: -Math.PI / 2 },
+      { label: 'TRANSFORM', value: s.transformation, angle: 0 },
+      { label: 'EXPRESS', value: s.expression, angle: Math.PI / 2 },
+      { label: 'RETURN', value: s.returnFlow, angle: Math.PI }
+    ];
+    let rings = '';
+    for (let i = 1; i <= 5; i++) {
+      const r = (R * i) / 5;
+      rings += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--parchment-ghost)" stroke-width="${i === 5 ? 1 : 0.6}" stroke-dasharray="${i === 5 ? '' : '1 3'}"/>`;
+    }
+    let lines = '', clientPts = [], vertices = '', labels = '';
+    axes.forEach((a, i) => {
+      const ex = cx + Math.cos(a.angle) * R, ey = cy + Math.sin(a.angle) * R;
+      lines += `<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="var(--parchment-ghost)" stroke-width="0.6"/>`;
+      const r = (R * a.value) / 5;
+      const px = cx + Math.cos(a.angle) * r, py = cy + Math.sin(a.angle) * r;
+      clientPts.push([px, py]);
+      vertices += `<circle cx="${px}" cy="${py}" r="3" fill="var(--amber)"/>`;
+      const lr = R + 22, lx = cx + Math.cos(a.angle) * lr, ly = cy + Math.sin(a.angle) * lr + 4;
+      const anchor = (i === 0 || i === 2) ? 'middle' : (i === 1 ? 'start' : 'end');
+      labels += `<text x="${lx}" y="${ly}" class="diag-radar-label" text-anchor="${anchor}">${a.label}</text>`;
+    });
+    const clientPath = clientPts.map(p => p.join(',')).join(' ');
+    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="diag-chart" role="img" aria-label="Four-axis metabolism radar">
+      ${rings}${lines}
+      <polygon points="${clientPath}" fill="var(--amber-glow)" stroke="var(--amber)" stroke-width="1.5"/>
+      ${vertices}${labels}
+      <circle cx="${cx}" cy="${cy}" r="2" fill="var(--parchment)"/>
+    </svg>`;
+  }
+
+  function diagRenderLanding() {
+    const priorLine = state.diagnostic
+      ? `<p class="diag-prior">Last taken ${new Date(state.diagnostic.takenAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} — placement was <strong>${escapeHtml(state.diagnostic.quadrant)}</strong>. Retaking will overwrite.</p>`
+      : '';
+    return `<div class="diag-landing">
+      <div class="diag-eyebrow">INFORMATION METABOLISM</div>
+      <h2 class="diag-heading">Diagnostic</h2>
+      <p class="diag-lede">A 12-question snapshot of how information moves through your system. Pipe or torus?</p>
+      <ul class="diag-meta"><li>Twelve questions</li><li>About four minutes</li><li>Stored only on this device</li></ul>
+      ${priorLine}
+      <button class="diag-btn-primary" data-diag="start">${state.diagnostic ? 'Retake' : 'Begin'}</button>
+      ${state.diagnostic ? '<button class="diag-btn-ghost" data-diag="show-report">See last report</button>' : ''}
+    </div>`;
+  }
+
+  function diagRenderQuestion() {
+    const q = DIAG_QUESTIONS[diagState.index];
+    const total = DIAG_QUESTIONS.length;
+    const selected = diagState.answers[q.id];
+    let dots = '';
+    for (let i = 0; i < total; i++) {
+      const cls = i === diagState.index ? 'diag-dot active' : (diagState.answers[DIAG_QUESTIONS[i].id] ? 'diag-dot done' : 'diag-dot');
+      dots += `<span class="${cls}"></span>`;
+    }
+    const axisLabel = { intake: 'Intake · Sift', transformation: 'Transformation · Alchemy', expression: 'Expression · Say Why', returnFlow: 'Return flow · Torus' }[q.axis];
+    let opts = '';
+    q.options.forEach((opt, i) => {
+      const val = i + 1;
+      opts += `<button class="diag-opt${selected === val ? ' selected' : ''}" data-diag="answer" data-value="${val}"><span class="diag-opt-num">${val}</span><span class="diag-opt-text">${escapeHtml(opt)}</span></button>`;
+    });
+    return `<div class="diag-question">
+      <div class="diag-q-head"><div class="diag-q-axis">${axisLabel}</div><div class="diag-q-progress">${diagState.index + 1} of ${total}</div></div>
+      <div class="diag-q-dots">${dots}</div>
+      <h3 class="diag-q-text">${escapeHtml(q.text)}</h3>
+      <div class="diag-q-options">${opts}</div>
+      <div class="diag-q-nav">
+        ${diagState.index > 0 ? '<button class="diag-btn-ghost" data-diag="back">← Back</button>' : '<span></span>'}
+        ${selected ? `<button class="diag-btn-primary" data-diag="next">${diagState.index === total - 1 ? 'See report →' : 'Next →'}</button>` : '<span class="diag-hint">Pick 1–5 or press a number key</span>'}
+      </div>
+    </div>`;
+  }
+
+  function diagRenderReport() {
+    const d = state.diagnostic;
+    if (!d) { diagState.view = 'landing'; return diagRenderLanding(); }
+    const s = d.scores;
+    const findings = diagFindings(s);
+    const recs = diagRecs(s);
+    const fmt = v => v.toFixed(1);
+    const findingsHtml = findings.map(f => `<li>${escapeHtml(f)}</li>`).join('');
+    const recsHtml = recs.map(r => `<div class="diag-rec"><div class="diag-rec-tier">${escapeHtml(r.tier)}</div><div class="diag-rec-body">${escapeHtml(r.body)}</div></div>`).join('');
+    return `<div class="diag-report">
+      <div class="diag-report-head"><div class="diag-eyebrow">METABOLISM REPORT</div><div class="diag-report-meta">${new Date(d.takenAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · placement: <strong>${escapeHtml(d.quadrant)}</strong></div></div>
+      <div class="diag-charts">
+        <div class="diag-chart-card"><div class="diag-chart-title">PLACEMENT MAP</div>${diagRenderTorusMap(s)}</div>
+        <div class="diag-chart-card"><div class="diag-chart-title">FOUR-AXIS METABOLISM</div>${diagRenderRadar(s)}</div>
+      </div>
+      <div class="diag-scores">
+        <div class="diag-score-pill"><div class="diag-score-label">INTAKE</div><div class="diag-score-value">${fmt(s.intake)}</div></div>
+        <div class="diag-score-pill"><div class="diag-score-label">TRANSFORM</div><div class="diag-score-value">${fmt(s.transformation)}</div></div>
+        <div class="diag-score-pill"><div class="diag-score-label">EXPRESS</div><div class="diag-score-value">${fmt(s.expression)}</div></div>
+        <div class="diag-score-pill"><div class="diag-score-label">RETURN</div><div class="diag-score-value">${fmt(s.returnFlow)}</div></div>
+      </div>
+      <div class="diag-findings"><div class="diag-section-title">KEY FINDINGS</div><ul>${findingsHtml}</ul></div>
+      <div class="diag-recs"><div class="diag-section-title">NEXT STEPS</div>${recsHtml}</div>
+      <div class="diag-report-foot"><button class="diag-btn-ghost" data-diag="restart">↻ Start over</button></div>
+    </div>`;
+  }
+
+  function renderDiagnostic() {
+    if (!diagRoot) return;
+    let html = '';
+    if (diagState.view === 'landing') html = diagRenderLanding();
+    else if (diagState.view === 'question') html = diagRenderQuestion();
+    else if (diagState.view === 'report') html = diagRenderReport();
+    diagRoot.innerHTML = html;
+    try { window.parent && window.parent !== window && window.parent.postMessage({ type: 'height', px: document.documentElement.scrollHeight }, '*'); } catch (e) {}
+  }
+
+  function diagCommitResults() {
+    const scores = diagComputeScores(diagState.answers);
+    const q = diagQuadrant(scores);
+    state.diagnostic = { answers: { ...diagState.answers }, scores, quadrant: q.name, summary: q.summary, takenAt: Date.now() };
+    saveState();
+    applyDiagnosticTuning();
+    updateCounts();
+    try { window.parent && window.parent !== window && window.parent.postMessage({ type: 'diagnostic-complete', scores, quadrant: q.name }, '*'); } catch (e) {}
+  }
+
+  function diagHandle(action, target) {
+    if (action === 'start') {
+      diagState = { view: 'question', index: 0, answers: {} };
+      renderDiagnostic();
+    } else if (action === 'answer') {
+      const val = parseInt(target.dataset.value, 10);
+      diagState.answers[DIAG_QUESTIONS[diagState.index].id] = val;
+      renderDiagnostic();
+    } else if (action === 'next') {
+      if (diagState.index < DIAG_QUESTIONS.length - 1) {
+        diagState.index++;
+        renderDiagnostic();
+      } else {
+        diagCommitResults();
+        diagState.view = 'report';
+        renderDiagnostic();
+      }
+    } else if (action === 'back') {
+      if (diagState.index > 0) { diagState.index--; renderDiagnostic(); }
+    } else if (action === 'restart') {
+      diagState = { view: 'landing', index: 0, answers: {} };
+      renderDiagnostic();
+    } else if (action === 'show-report') {
+      diagState.view = 'report';
+      renderDiagnostic();
+    }
+  }
+
+  if (diagRoot) {
+    diagRoot.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-diag]');
+      if (!t) return;
+      diagHandle(t.dataset.diag, t);
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (currentView !== 'diagnostic') return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (diagState.view === 'question') {
+      if (e.key >= '1' && e.key <= '5') {
+        const val = parseInt(e.key, 10);
+        diagState.answers[DIAG_QUESTIONS[diagState.index].id] = val;
+        renderDiagnostic();
+        setTimeout(() => {
+          if (diagState.answers[DIAG_QUESTIONS[diagState.index].id] === val && diagState.view === 'question') diagHandle('next');
+        }, 220);
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+        diagHandle('back');
+      } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
+        if (diagState.answers[DIAG_QUESTIONS[diagState.index].id]) diagHandle('next');
+      }
     }
   });
 

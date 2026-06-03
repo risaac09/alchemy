@@ -1,6 +1,7 @@
 import {
   App,
   ItemView,
+  Notice,
   Plugin,
   PluginSettingTab,
   Setting,
@@ -38,6 +39,16 @@ interface InboxItem {
   openedAt?: number;
 }
 
+interface Rubric {
+  clarity: number | null;
+  integrity: number | null;
+  somatic: number | null;
+  transmutation: number | null;
+  release: number | null;
+  note: string | null;
+  ratedAt: number | null;
+}
+
 interface GoldItem {
   id: string;
   matter: string;
@@ -48,6 +59,7 @@ interface GoldItem {
   transmuted: number;
   archived: number;
   type: "text" | "link";
+  rubric?: Rubric | null;
 }
 
 interface ThresholdEntry {
@@ -60,6 +72,14 @@ interface FrictionEntry {
   text: string;
 }
 
+interface DiagnosticSnapshot {
+  answers: Record<string, number>;
+  scores: { intake: number; transformation: number; expression: number; returnFlow: number; volume: number; circulation: number };
+  quadrant: string;
+  summary: string;
+  takenAt: number;
+}
+
 interface AlchemyData {
   inbox: InboxItem[];
   archive: GoldItem[];
@@ -68,6 +88,7 @@ interface AlchemyData {
   lastResurface: number;
   thresholds: ThresholdEntry[];
   frictionLog: FrictionEntry[];
+  diagnostic?: DiagnosticSnapshot | null;
 }
 
 interface AlchemySettings {
@@ -92,6 +113,7 @@ const DEFAULT_DATA: AlchemyData = {
   lastResurface: 0,
   thresholds: [],
   frictionLog: [],
+  diagnostic: null,
 };
 
 // ═══════════════════════════════════════════════
@@ -113,6 +135,12 @@ export default class AlchemyPlugin extends Plugin {
       id: "open-alchemy",
       name: "Open Alchemy",
       callback: () => this.activateView(),
+    });
+
+    this.addCommand({
+      id: "write-metabolism-snapshot",
+      name: "Write metabolism snapshot to vault",
+      callback: () => this.writeMetabolismSnapshot(),
     });
 
     // Obsidian URI: obsidian://alchemy?capture=...
@@ -205,12 +233,53 @@ export default class AlchemyPlugin extends Plugin {
       let content = `---\ncaptured: ${capturedDate}\ntransmuted: ${transmutedDate}\nsource: alchemy\n`;
       if (item.map) content += `map: ${item.map}\n`;
       if (item.bodyCheck) content += `body: ${item.bodyCheck}\n`;
+      if (item.rubric) {
+        const dims = ["clarity", "integrity", "somatic", "transmutation", "release"] as const;
+        for (const d of dims) {
+          const v = item.rubric[d];
+          if (v != null) content += `rubric_${d}: ${v}\n`;
+        }
+        if (item.rubric.note) content += `rubric_note: "${item.rubric.note.replace(/"/g, '\\"')}"\n`;
+      }
       content += `---\n\n> ${item.matter.replace(/\n/g, "\n> ")}\n\n${item.reflection}\n`;
 
       await this.app.vault.create(fileName, content);
       return fileName;
     } catch (e) {
       console.error("Alchemy: failed to write vault note", e);
+      return null;
+    }
+  }
+
+  // Write a metabolism snapshot note (scores + trends) to the vault.
+  async writeMetabolismSnapshot(): Promise<string | null> {
+    try {
+      const d = this.alchemyData.diagnostic;
+      if (!d) {
+        new Notice("No diagnostic results yet. Run the diagnostic in the PWA first.");
+        return null;
+      }
+      const folder = normalizePath(`${this.settings.goldFolder}/_snapshots`);
+      if (!this.app.vault.getAbstractFileByPath(folder)) {
+        await this.app.vault.createFolder(folder);
+      }
+      const dateStr = new Date(d.takenAt).toISOString().slice(0, 10);
+      const fileName = normalizePath(`${folder}/metabolism-${dateStr}.md`);
+      if (this.app.vault.getAbstractFileByPath(fileName)) {
+        new Notice(`Snapshot for ${dateStr} already exists.`);
+        return fileName;
+      }
+      const s = d.scores;
+      const fmt = (v: number) => v.toFixed(1);
+      const thirty = Date.now() - 30 * 86400000;
+      const recentKeeps = this.alchemyData.events.filter(e => e.type === "keep" && e.ts > thirty).length;
+      const recentReleases = this.alchemyData.events.filter(e => e.type === "release" && e.ts > thirty).length;
+      let content = `---\ntaken: ${dateStr}\nsource: alchemy\nquadrant: ${d.quadrant}\nintake: ${fmt(s.intake)}\ntransformation: ${fmt(s.transformation)}\nexpression: ${fmt(s.expression)}\nreturn_flow: ${fmt(s.returnFlow)}\nvolume: ${fmt(s.volume)}\ncirculation: ${fmt(s.circulation)}\n---\n\n# Metabolism Snapshot — ${dateStr}\n\nPlacement: **${d.quadrant}** — ${d.summary}.\n\n| Axis | Score |\n|---|---|\n| Intake | ${fmt(s.intake)} |\n| Transformation | ${fmt(s.transformation)} |\n| Expression | ${fmt(s.expression)} |\n| Return flow | ${fmt(s.returnFlow)} |\n\n## Practice pulse (last 30 days)\n- Keeps: ${recentKeeps}\n- Releases: ${recentReleases}\n- Archive size: ${this.alchemyData.archive.length}\n- Thresholds recorded: ${this.alchemyData.thresholds.length}\n\n*Snapshot written from Alchemy plugin.*\n`;
+      await this.app.vault.create(fileName, content);
+      new Notice(`Snapshot written to ${fileName}`);
+      return fileName;
+    } catch (e) {
+      console.error("Alchemy: failed to write snapshot", e);
       return null;
     }
   }
@@ -817,7 +886,9 @@ class AlchemySettingTab extends PluginSettingTab {
               if (parsed.archive && Array.isArray(parsed.archive)) {
                 this.plugin.alchemyData = Object.assign({ ...DEFAULT_DATA }, parsed);
                 await this.plugin.saveAlchemyData();
-                containerEl.createEl("p", { text: `Imported ${parsed.archive.length} archive items.`, cls: "alchemy-import-ok" });
+                const parts = [`${parsed.archive.length} archive items`];
+                if (parsed.diagnostic) parts.push(`diagnostic snapshot (${parsed.diagnostic.quadrant})`);
+                containerEl.createEl("p", { text: `Imported ${parts.join(", ")}.`, cls: "alchemy-import-ok" });
               }
             } catch { /* invalid JSON, wait for more input */ }
           })

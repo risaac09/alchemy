@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Alchemy</title>
+<title>Information Metabolism Diagnostic</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -14,8 +14,18 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <link rel="stylesheet" href="app.css">
+<style>
+  /* Embed mode: show only the diagnostic view, hide chrome */
+  body.embed header, body.embed .cassette, body.embed .capacity-bar,
+  body.embed nav.nav, body.embed footer,
+  body.embed #viewInbox, body.embed #viewReflect, body.embed #viewGold,
+  body.embed #viewArchive, body.embed #viewLog,
+  body.embed .onboarding-overlay { display: none !important; }
+  body.embed .shell { padding: 8px 12px; max-width: 760px; }
+  body.embed #viewDiagnostic { display: block !important; }
+</style>
 </head>
-<body>
+<body class="embed" data-embed="true">
 
 <div class="shell">
 
@@ -138,18 +148,6 @@
       <div class="body-check-wrap">
         <label class="body-check-label" for="bodyCheckInput">Somatic pulse</label>
         <input class="body-check-input" id="bodyCheckInput" type="text" maxlength="30" placeholder="one word — what's loudest?" autocomplete="off" spellcheck="false" />
-        <button type="button" class="vocab-toggle" id="vocabToggle" aria-expanded="false">can't find a word?</button>
-        <div class="vocab-panel" id="vocabPanel" hidden>
-          <p class="vocab-prose">Scan. Don't checklist. One word is enough.</p>
-          <div class="vocab-group"><span class="vocab-dim">temperature</span><span class="vocab-words">warm · cool · hot · cold · flushed · chilled · clammy · even · damp</span></div>
-          <div class="vocab-group"><span class="vocab-dim">density</span><span class="vocab-words">heavy · light · dense · porous · thick · thin · solid · hollow · leaden · airy</span></div>
-          <div class="vocab-group"><span class="vocab-dim">movement</span><span class="vocab-words">still · buzzing · fluttering · pulsing · churning · spiraling · trembling · settled · agitated</span></div>
-          <div class="vocab-group"><span class="vocab-dim">edges</span><span class="vocab-words">contracted · expanded · tight · loose · held · released · braced · yielding · sharp · blurred</span></div>
-          <div class="vocab-group"><span class="vocab-dim">breath</span><span class="vocab-words">shallow · deep · caught · free · high · low · suspended · ragged · smooth · held</span></div>
-          <div class="vocab-group"><span class="vocab-dim">texture</span><span class="vocab-words">smooth · rough · grainy · silky · prickly · tender · taut · soft · brittle</span></div>
-          <div class="vocab-group"><span class="vocab-dim">direction</span><span class="vocab-words">rising · falling · lifting · pressing · scattered · centered · forward · withdrawn</span></div>
-          <div class="vocab-group"><span class="vocab-dim">charge</span><span class="vocab-words">buzzing · neutral · charged · flat · electric · dull · alert · foggy · muffled</span></div>
-        </div>
       </div>
 
       <div class="reflect-input-wrap">
@@ -304,5 +302,25 @@
 <div class="toast" id="toast" aria-live="polite" role="status"></div>
 
 <script src="app.js"></script>
+<script>
+  // Embed mode: switch to diagnostic immediately. app.js's postMessage calls
+  // inside renderDiagnostic() already notify the parent of height changes.
+  (function () {
+    const nav = document.getElementById('navDiagnostic');
+    if (nav) nav.click();
+    // Report height after each resize / DOM update, for iframe auto-sizing
+    function postHeight() {
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'height', px: document.documentElement.scrollHeight }, '*');
+        }
+      } catch (e) {}
+    }
+    window.addEventListener('resize', postHeight);
+    const mo = new MutationObserver(postHeight);
+    mo.observe(document.getElementById('diagnosticRoot'), { childList: true, subtree: true });
+    postHeight();
+  })();
+</script>
 </body>
 </html>

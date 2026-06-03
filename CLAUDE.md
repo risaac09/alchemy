@@ -22,15 +22,21 @@ icon-*.png  — App icons (192, 512)
 
 No build. No bundler. Edit the files directly and push.
 
-## Core Mechanics — v1.2.0 (Metabolizer merge)
+## Core Mechanics — v1.3.0 (Diagnostic + Rubric merge)
 
-The loop: **Capture (Inhale) → Settle → Somatic pulse → Reflect (Pause) → Transform (Alchemize) → Map → Release (Exhale)**
+The loop: **Capture (Inhale) → Settle → Somatic pulse → Reflect (Pause) → Transform (Alchemize) → Map → Release (Exhale) → Rubric (self-assessment at Keep)**
 
 Metabolizer concepts absorbed:
 - **Somatic pulse** — one-word body check before reflection, stored on gold + archive items
+- **Body Vocabulary** — expandable helper panel below the somatic pulse input, 8 quality categories
 - **Maps** — 5 types (observation/question/connection/tension/practice), tagged at keep, filterable in archive; in plugin: write to map subfolders
 - **Weekly Threshold** — "What shifted?" prompt in Log, stores up to 52 entries
 - **Friction Log** — meta-practice in Log, one-line avoidance catches
+
+v1.3.0 additions:
+- **Post-keep rubric** — 5-dim self-rating (clarity, integrity, somatic, transmutation, release) fires once when Keeping an item. 1–5 per dim + optional note. Dismissible (archives without scores). Adapted from `methodology/evaluation-framework.md`.
+- **Diagnostic view** — 6th view (`Diag` tab, keyboard `4`). 12-question Information Metabolism assessment absorbed from `alchemy-diagnostic`. 4 axes (intake/transformation/expression/returnFlow), 2×2 quadrant placement (Stagnant/Drowning/Distilling/Thriving), SVG radar + placement map. Results persist in `state.diagnostic`, surface on the Log as "Metabolism placement".
+- **Embed mode** — `embed.html` shows only the diagnostic view; body.embed CSS hides chrome; `body[data-embed="true"]` skips SW registration and onboarding. Posts `{type:'height'}` and `{type:'diagnostic-complete',scores,quadrant}` to parent frame.
 
 The original loop: **Capture (Inhale) → Reflect (Pause) → Transform (Alchemize) → Release (Exhale)**
 
@@ -53,7 +59,11 @@ Single localStorage key: `alchemy_v2`. Shape:
 ```
 
 Inbox items have: `id, text, created, type, fileName?, fileType?, fileSize?, preview?, resurfaced?, opened?`
-Archive items have: `id, matter, reflection, created, transmuted, archived, type, fileName?, fileType?, fileSize?, preview?`
+Archive items have: `id, matter, reflection, created, transmuted, archived, type, fileName?, fileType?, fileSize?, preview?, map?, bodyCheck?, rubric?`
+
+`rubric` (nullable) shape: `{ clarity, integrity, somatic, transmutation, release, note, ratedAt }` — each score field nullable (unrated = null). When the user dismisses the rubric form entirely, `rubric === null`.
+
+`state.diagnostic` (nullable) shape: `{ answers: {q1..q12: 1..5}, scores: {intake, transformation, expression, returnFlow, volume, circulation}, quadrant: 'Stagnant'|'Drowning'|'Distilling'|'Thriving', summary, takenAt }`
 
 ## Design Principles — READ BEFORE CHANGING ANYTHING
 
@@ -66,12 +76,16 @@ Archive items have: `id, matter, reflection, created, transmuted, archived, type
 
 ## Views
 
-5 views (Inbox, Reflect, Gold, Archive, Log) + Release Modal. Views toggle via `.active` class. State machine:
+6 views (Inbox, Reflect, Gold, Archive, Log, Diagnostic) + Release Modal. Views toggle via `.active` class. State machine:
 
 ```
-Inbox -> click item -> Reflect -> Alchemize -> Gold -> Release Modal -> Keep (Archive) or Let Go (Inbox)
-                                                    -> Back (restore to Inbox)
+Inbox -> click item -> Reflect -> Alchemize -> Gold -> Release Modal -> Keep -> Rubric form -> Archive
+                                                                     -> Let Go (Inbox)
+                                                                     -> Back (restore to Inbox)
+Diagnostic (independent): Landing -> Question × 12 -> Report (saved to state.diagnostic)
 ```
+
+The Rubric form intercepts the Keep → Archive transition. Esc or click-outside dismisses the rubric and archives without scores.
 
 ## Key Features (v1.1.0)
 

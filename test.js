@@ -292,6 +292,8 @@ function testKeep() {
   assert(modal.classList.contains('active'), 'Release modal is active');
 
   doc.getElementById('modalKeep').click();
+  // Post-keep rubric form intercepts — dismiss to archive without scores
+  doc.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape' }));
 
   const state = getState(dom);
   assertEqual(state.inbox.length, 0, 'Inbox empty after keep');
@@ -1099,7 +1101,7 @@ function testVersionDisplay() {
   doc.getElementById('navLog').click();
   const version = doc.querySelector('.log-version');
   assert(version !== null, 'Version element in log');
-  assert(version.textContent.includes('1.2.0'), 'Version shows 1.2.0');
+  assert(version.textContent.includes('1.3.0'), 'Version shows 1.3.0');
 
   dom.window.close();
 }
@@ -1147,6 +1149,280 @@ function testAscendencyAria() {
 // ═══════════════════════════════════════════════
 console.log('Alchemy Test Suite\n');
 
+// ═══════════════════════════════════════════════
+//  TEST: Keep dismissed rubric → rubric: null
+// ═══════════════════════════════════════════════
+function testRubricDismissed() {
+  const seed = {
+    inbox: [{ id: 'r-dismiss', text: 'Dismiss me', created: Date.now() - 60000, type: 'text' }],
+    archive: [], stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: 0
+  };
+  const dom = createApp(seed);
+  const doc = dom.window.document;
+
+  doc.querySelectorAll('.inbox-item')[0].click();
+  const reflectInput = doc.getElementById('reflectInput');
+  reflectInput.value = 'ok';
+  reflectInput.dispatchEvent(new dom.window.Event('input'));
+  doc.getElementById('alchemizeBtn').click();
+  doc.getElementById('releaseBtn').click();
+  doc.getElementById('modalKeep').click();
+
+  // Rubric form should be visible
+  const modalRubric = doc.getElementById('modalRubric');
+  assert(modalRubric.style.display !== 'none', 'Rubric form shown after Keep');
+
+  // Dismiss via Esc (archives without rubric)
+  doc.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape' }));
+
+  const state = getState(dom);
+  assertEqual(state.archive.length, 1, 'Archived after dismiss');
+  assertEqual(state.archive[0].rubric, null, 'Dismissed rubric is null');
+  assertEqual(state.stats.totalKept, 1, 'totalKept incremented on dismiss');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Keep with full rating → all 5 dims stored
+// ═══════════════════════════════════════════════
+function testRubricFullRating() {
+  const seed = {
+    inbox: [{ id: 'r-full', text: 'Rate me', created: Date.now() - 60000, type: 'text' }],
+    archive: [], stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: 0
+  };
+  const dom = createApp(seed);
+  const doc = dom.window.document;
+
+  doc.querySelectorAll('.inbox-item')[0].click();
+  const reflectInput = doc.getElementById('reflectInput');
+  reflectInput.value = 'reflection';
+  reflectInput.dispatchEvent(new dom.window.Event('input'));
+  doc.getElementById('alchemizeBtn').click();
+  doc.getElementById('releaseBtn').click();
+  doc.getElementById('modalKeep').click();
+
+  // Click a value in each dim
+  const dims = ['clarity', 'integrity', 'somatic', 'transmutation', 'release'];
+  const values = [4, 3, 2, 5, 3];
+  dims.forEach((dim, i) => {
+    const scale = doc.querySelector(`.rubric-scale[data-dim="${dim}"]`);
+    const btn = scale.querySelector(`button[data-v="${values[i]}"]`);
+    btn.click();
+  });
+
+  doc.getElementById('rubricArchive').click();
+
+  const state = getState(dom);
+  assertEqual(state.archive.length, 1, 'Archived with full rating');
+  const r = state.archive[0].rubric;
+  assert(r !== null, 'Rubric object exists');
+  assertEqual(r.clarity, 4, 'clarity stored');
+  assertEqual(r.integrity, 3, 'integrity stored');
+  assertEqual(r.somatic, 2, 'somatic stored');
+  assertEqual(r.transmutation, 5, 'transmutation stored');
+  assertEqual(r.release, 3, 'release stored');
+  assert(typeof r.ratedAt === 'number' && r.ratedAt > 0, 'ratedAt timestamp set');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Keep with partial rating + note
+// ═══════════════════════════════════════════════
+function testRubricPartialWithNote() {
+  const seed = {
+    inbox: [{ id: 'r-partial', text: 'Partial', created: Date.now() - 60000, type: 'text' }],
+    archive: [], stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: 0
+  };
+  const dom = createApp(seed);
+  const doc = dom.window.document;
+
+  doc.querySelectorAll('.inbox-item')[0].click();
+  const reflectInput = doc.getElementById('reflectInput');
+  reflectInput.value = 'r';
+  reflectInput.dispatchEvent(new dom.window.Event('input'));
+  doc.getElementById('alchemizeBtn').click();
+  doc.getElementById('releaseBtn').click();
+  doc.getElementById('modalKeep').click();
+
+  // Rate only clarity + release
+  doc.querySelector('.rubric-scale[data-dim="clarity"] button[data-v="5"]').click();
+  doc.querySelector('.rubric-scale[data-dim="release"] button[data-v="2"]').click();
+  doc.getElementById('rubricNote').value = 'felt cleaner after';
+  doc.getElementById('rubricArchive').click();
+
+  const state = getState(dom);
+  const r = state.archive[0].rubric;
+  assertEqual(r.clarity, 5, 'clarity stored');
+  assertEqual(r.release, 2, 'release stored');
+  assertEqual(r.integrity, null, 'unrated integrity null');
+  assertEqual(r.somatic, null, 'unrated somatic null');
+  assertEqual(r.transmutation, null, 'unrated transmutation null');
+  assertEqual(r.note, 'felt cleaner after', 'note stored');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Migration — existing archive items without rubric load cleanly
+// ═══════════════════════════════════════════════
+function testRubricMigration() {
+  const seed = {
+    inbox: [],
+    archive: [
+      { id: 'old-1', matter: 'Legacy item', reflection: 'pre-rubric', created: Date.now() - 86400000, transmuted: Date.now() - 86300000, archived: Date.now() - 86200000, type: 'text' }
+    ],
+    stats: { totalKept: 1, totalReleased: 0 }, events: [], lastResurface: Date.now()
+  };
+  const dom = createApp(seed);
+  const doc = dom.window.document;
+
+  const state = getState(dom);
+  assertEqual(state.archive.length, 1, 'Legacy archive item loaded');
+  assert(state.archive[0].rubric === undefined || state.archive[0].rubric === null, 'Legacy rubric is absent/null');
+
+  // Navigate to archive view — should render without throwing
+  doc.getElementById('navArchive').click();
+  const items = doc.querySelectorAll('.archive-item');
+  assertEqual(items.length, 1, 'Legacy item renders');
+  const rubricLines = doc.querySelectorAll('.archive-item-rubric');
+  assertEqual(rubricLines.length, 0, 'No rubric line for legacy item');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Diagnostic — full flow stores results + quadrant
+// ═══════════════════════════════════════════════
+function testDiagnosticFullFlow() {
+  const dom = createApp();
+  const doc = dom.window.document;
+
+  doc.getElementById('navDiagnostic').click();
+  assert(doc.getElementById('viewDiagnostic').classList.contains('active'), 'Diagnostic view is active');
+  doc.querySelector('[data-diag="start"]').click();
+
+  for (let i = 0; i < 12; i++) {
+    // All 5s: max volume + max circulation = Thriving
+    doc.querySelector('.diag-opt[data-value="5"]').click();
+    doc.querySelector('[data-diag="next"]').click();
+  }
+
+  const state = getState(dom);
+  assert(state.diagnostic !== null, 'Diagnostic snapshot saved');
+  assertEqual(state.diagnostic.quadrant, 'Thriving', 'All-5s maps to Thriving');
+  assertEqual(state.diagnostic.scores.volume, 5, 'Volume captured');
+  assertEqual(state.diagnostic.answers.q1, 5, 'Answers stored');
+  assert(typeof state.diagnostic.takenAt === 'number', 'takenAt set');
+  assert(doc.querySelector('.diag-report'), 'Report view rendered');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Diagnostic — low scores map to Stagnant
+// ═══════════════════════════════════════════════
+function testDiagnosticQuadrantStagnant() {
+  const dom = createApp();
+  const doc = dom.window.document;
+  doc.getElementById('navDiagnostic').click();
+  doc.querySelector('[data-diag="start"]').click();
+  for (let i = 0; i < 12; i++) {
+    doc.querySelector('.diag-opt[data-value="1"]').click();
+    doc.querySelector('[data-diag="next"]').click();
+  }
+  const state = getState(dom);
+  assertEqual(state.diagnostic.quadrant, 'Stagnant', 'All-1s maps to Stagnant');
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Diagnostic — persists across reload, Log shows placement
+// ═══════════════════════════════════════════════
+function testDiagnosticLogPlacement() {
+  const seed = {
+    inbox: [], archive: [],
+    stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: Date.now(),
+    diagnostic: {
+      answers: { q1:4,q2:4,q3:4,q4:4,q5:4,q6:4,q7:4,q8:4,q9:4,q10:4,q11:4,q12:4 },
+      scores: { intake: 3, transformation: 4, expression: 4, returnFlow: 4, volume: 4, circulation: 3.75 },
+      quadrant: 'Thriving', summary: 'a circulating torus', takenAt: Date.now() - 3600000
+    }
+  };
+  const dom = createApp(seed);
+  const doc = dom.window.document;
+
+  doc.getElementById('navLog').click();
+  const titles = Array.from(doc.querySelectorAll('.log-section-title')).map(s => s.textContent);
+  assert(titles.includes('Metabolism placement'), 'Log shows Metabolism placement section');
+  const diagSection = Array.from(doc.querySelectorAll('.log-section')).find(s =>
+    s.querySelector('.log-section-title')?.textContent === 'Metabolism placement'
+  );
+  assert(diagSection.textContent.includes('Thriving'), 'Quadrant name surfaces in Log');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Diagnostic — retaking overwrites prior snapshot
+// ═══════════════════════════════════════════════
+function testDiagnosticRetake() {
+  const seed = {
+    inbox: [], archive: [], stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: Date.now(),
+    diagnostic: {
+      answers: { q1:1 }, scores: { intake:1, transformation:1, expression:1, returnFlow:1, volume:1, circulation:1 },
+      quadrant: 'Stagnant', summary: 'an idle field', takenAt: Date.now() - 86400000
+    }
+  };
+  const dom = createApp(seed);
+  const doc = dom.window.document;
+  const priorTakenAt = seed.diagnostic.takenAt;
+
+  doc.getElementById('navDiagnostic').click();
+  // Landing should offer Retake, not Begin
+  assert(doc.querySelector('[data-diag="start"]').textContent.includes('Retake'), 'Shows Retake when prior exists');
+  doc.querySelector('[data-diag="start"]').click();
+  for (let i = 0; i < 12; i++) {
+    doc.querySelector('.diag-opt[data-value="4"]').click();
+    doc.querySelector('[data-diag="next"]').click();
+  }
+  const state = getState(dom);
+  assert(state.diagnostic.takenAt > priorTakenAt, 'takenAt advanced on retake');
+  assertEqual(state.diagnostic.answers.q1, 4, 'Answers replaced');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Diagnostic tunes inbox cap when intake score low
+// ═══════════════════════════════════════════════
+function testDiagnosticTunesCap() {
+  const seed = {
+    inbox: [], archive: [], stats: { totalKept: 0, totalReleased: 0 }, events: [], lastResurface: Date.now(),
+    diagnostic: {
+      answers: { q1:5,q2:1,q3:1,q4:3,q5:3,q6:3,q7:3,q8:3,q9:3,q10:1,q11:1,q12:1 },
+      // intake mean [inv(5)=1, 1, 1] = 1 → triggers cap=5; returnFlow mean(1,1,1)=1 → triggers 5-day resurface
+      scores: { intake: 1, transformation: 3, expression: 3, returnFlow: 1, volume: 5, circulation: 2 },
+      quadrant: 'Drowning', summary: 'a pipe under pressure', takenAt: Date.now()
+    }
+  };
+  const dom = createApp(seed);
+  const doc = dom.window.document;
+
+  // Cap should be 5 — the capacity label reflects MAX_CAPACITY
+  const capLabel = doc.getElementById('capacityLabel').textContent;
+  assert(capLabel.endsWith('/5'), 'Capacity label shows tuned cap of 5 (got "' + capLabel + '")');
+
+  // Log view should surface the tuning
+  doc.getElementById('navLog').click();
+  const logText = doc.getElementById('logContent').textContent;
+  assert(logText.includes('inbox cap 5'), 'Log mentions tuned cap');
+  assert(logText.includes('resurface every 5 days'), 'Log mentions tuned resurface interval');
+
+  dom.window.close();
+}
+
 const tests = [
   ['Fresh load', testFreshLoad],
   ['Capture', testCapture],
@@ -1184,6 +1460,15 @@ const tests = [
   ['Version display', testVersionDisplay],
   ['Notification migration', testNotificationMigration],
   ['Ascendency ARIA', testAscendencyAria],
+  ['Rubric dismissed', testRubricDismissed],
+  ['Rubric full rating', testRubricFullRating],
+  ['Rubric partial + note', testRubricPartialWithNote],
+  ['Rubric migration', testRubricMigration],
+  ['Diagnostic full flow', testDiagnosticFullFlow],
+  ['Diagnostic quadrant — stagnant', testDiagnosticQuadrantStagnant],
+  ['Diagnostic Log placement', testDiagnosticLogPlacement],
+  ['Diagnostic retake', testDiagnosticRetake],
+  ['Diagnostic tunes inbox cap', testDiagnosticTunesCap],
 ];
 
 for (const [name, fn] of tests) {

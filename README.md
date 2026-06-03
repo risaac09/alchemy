@@ -9,18 +9,23 @@ Alchemy sits between consuming and knowing. It forces a pause — settle, check 
 ## The loop
 
 ```
-Capture (Inhale) → Settle 30s → Somatic pulse → Reflect → Alchemize → Map → Release
+Capture (Inhale) → Settle 30s → Somatic pulse → Reflect → Alchemize → Map → Release → Rubric
 ```
 
 1. **Inhale** anything — text, links, images, files. Hard cap: 7 items.
 2. **Wait** 30 seconds. No instant processing. The settle period is intentional.
-3. **Check your body** — one word. What's loudest before your intellect takes over?
+3. **Check your body** — one word. What's loudest before your intellect takes over? A vocabulary helper sits behind "can't find a word?"
 4. **Reflect** — write why it matters. One of 40+ contextual prompts will meet you there.
 5. **Alchemize** — raw matter becomes gold. Transmutation complete.
 6. **Map it** — where does it connect? Observation / Question / Connection / Tension / Practice.
 7. **Release** — keep it (archive, or write to vault) or let it go (return to void).
+8. **Rubric** — at Keep, rate the passage across five dimensions (clarity, integrity, somatic, transmutation, release) 1–5. Optional. Dismiss to archive without scores.
 
 Unattended items decay after 72 hours. Archived gold composts after 90 days. Every 3 days, the oldest archived item resurfaces for re-evaluation.
+
+### Diagnostic
+
+A sixth view (`Diag`, keyboard `4`) offers a 12-question snapshot of how information moves through your system. Four axes (intake / transformation / expression / return flow) plot you on a 2×2 map — Stagnant, Drowning, Distilling, or Thriving. Computed locally, no server. The placement surfaces back in the Log. An embeddable version lives at `embed.html` for iframing on third-party sites.
 
 ---
 
