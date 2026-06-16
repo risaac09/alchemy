@@ -4,7 +4,7 @@
   // ═══════════════════════════════════════════════
   //  THERMODYNAMIC CONSTANTS
   // ═══════════════════════════════════════════════
-  const VERSION = '1.3.0';
+  const VERSION = '1.3.1';
   const BASE_MAX_CAPACITY = 7;     // Cassette tape finitude (default)
   let MAX_CAPACITY = BASE_MAX_CAPACITY; // Mutated by diagnostic-reactive tuning
   const DECAY_MS = 72 * 3600000;   // 72 hours to full decay
@@ -1575,6 +1575,62 @@
     URL.revokeObjectURL(url);
     showToast('Exported — keep this somewhere safe');
   });
+
+  // Backup to vault: write the export straight into a folder you pick once
+  // (a synced folder works well). Local only, no network. The browser remembers
+  // the folder, so after the first time it is one tap. Falls back to Export when
+  // the File System Access API is missing (Safari, older browsers).
+  const vaultBtn = $('vaultBtn');
+  if (vaultBtn) {
+    if (typeof window.showDirectoryPicker !== 'function') {
+      vaultBtn.hidden = true;
+    } else {
+      vaultBtn.hidden = false;
+      vaultBtn.addEventListener('click', backupToVault);
+    }
+  }
+
+  function vaultHandle(mode, value) {
+    return new Promise((resolve, reject) => {
+      const open = indexedDB.open('alchemy-fs', 1);
+      open.onupgradeneeded = () => open.result.createObjectStore('handles');
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const tx = open.result.transaction('handles', mode === 'put' ? 'readwrite' : 'readonly');
+        const store = tx.objectStore('handles');
+        const req = mode === 'put' ? store.put(value, 'vaultDir') : store.get('vaultDir');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      };
+    });
+  }
+
+  async function ensureVaultDir() {
+    const opts = { mode: 'readwrite' };
+    let dir = await vaultHandle('get');
+    if (dir) {
+      if ((await dir.queryPermission(opts)) === 'granted') return dir;
+      if ((await dir.requestPermission(opts)) === 'granted') return dir;
+    }
+    dir = await window.showDirectoryPicker({ id: 'alchemy-vault', mode: 'readwrite' });
+    await vaultHandle('put', dir);
+    return dir;
+  }
+
+  async function backupToVault() {
+    try {
+      const dir = await ensureVaultDir();
+      const name = 'alchemy-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      const fh = await dir.getFileHandle(name, { create: true });
+      const writable = await fh.createWritable();
+      await writable.write(JSON.stringify(state, null, 2));
+      await writable.close();
+      showToast('Backed up to the vault');
+    } catch (err) {
+      if (err && err.name === 'AbortError') return; // picker dismissed, no harm
+      showToast('Vault backup failed — use Export');
+    }
+  }
 
   importBtn.addEventListener('click', () => importFile.click());
 

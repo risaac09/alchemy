@@ -1,4 +1,4 @@
-const CACHE_NAME = 'alchemy-v12';
+const CACHE_NAME = 'alchemy-v13';
 const ASSETS = [
   '.',
   'index.html',
