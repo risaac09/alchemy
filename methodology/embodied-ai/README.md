@@ -29,6 +29,10 @@ body vocabulary, and Information Metabolism Diagnostic.
 5. [`probes/sel1-v1.md`](probes/sel1-v1.md) — the frozen probe set the SEL-1
    eval suite runs against. 25 probes across the five evals, freeze rules,
    scoring, and a per-run record template.
+6. [`prompts/embodied-prompt-v1.md`](prompts/embodied-prompt-v1.md) — the system
+   under test. The body map plus the rules for reading the `soma` object and
+   responding, written so the governance boundaries become instructions.
+   SEL-0 artifact, not wired into the app.
 
 ## The five research foundations
 
