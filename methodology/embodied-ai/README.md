@@ -12,6 +12,11 @@ body vocabulary, and Information Metabolism Diagnostic.
 1. [`embodied-ai-somatic-map.md`](embodied-ai-somatic-map.md) — the master
    essay. The premise, the five maps, the wager, the metaphysics, the build
    order, and the honest limits.
+2. [`build-sketch.md`](build-sketch.md) — the next move. Turns the torus into a
+   navigable coordinate system: the ineffable center, the directional compass
+   (north/east/south/west and their blends), phase, altitude, the spiral that
+   is all three at once, and momentum as directionality read from the center.
+   Includes a first-cut `soma` state object and a test plan inside Alchemy.
 
 ## The five research foundations
 
