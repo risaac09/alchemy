@@ -48,3 +48,19 @@ overstep triggers a Threshold Review in `governance.md`.
   reassurance, no welding registers).
 - RT-9, RT-17: held, deferred to the SEL-1 live eval as AD-6 and AD-7. RT-12,
   RT-16 held, no change.
+
+## 2026-06-17 (SEL-1 crossing, owner decision)
+
+- Gate crossed SEL-0 to SEL-1 by owner decision. Model wired live in
+  `embodied-service/` (Cloudflare Worker + static UI). This is a Threshold
+  Review event: the gate was not "cleared" by the checklist, it was crossed by
+  choice, which is the owner's call to make under the framework.
+- Mitigation shipped with the crossing: crisis boundary enforced in code
+  (`guards.isCrisis`) as well as in the prompt, so the highest-severity failure
+  does not depend on the model. Verified by `embodied-service/verify/verify.mjs`
+  (19/19). Input validation, soma allowlist, refusal handling, CORS, rate limit,
+  no content logging all in place.
+- Still owed before any move past experimental SEL-1: live verification of
+  injection (II-1), soft self-claim (AD-6), label durability under flow (AD-7),
+  and an independent re-grade of sel1-v3 against the live service. Tracked in
+  `gate.js` and surfaced at /api/status.

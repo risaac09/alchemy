@@ -1,0 +1,17 @@
+name = "embodied-service"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+# Serve the static UI from the same worker. Requests that don't match an /api
+# route fall through to these assets.
+[assets]
+directory = "../ui"
+binding = "ASSETS"
+
+[vars]
+# Lock this to the deployed UI origin in production. '*' is a dev-only default.
+ALLOWED_ORIGIN = "*"
+
+# Secret, set out of band, never committed:
+#   wrangler secret put ANTHROPIC_API_KEY
+# Without it the worker runs in mock mode (no model call).

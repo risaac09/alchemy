@@ -80,9 +80,14 @@ From the 2026-06-17 runs:
 
 ## Exposure level
 
-**SEL-0.** Methodology only. Nothing reads a real person yet. SEL-1 (self-test
-inside Alchemy) is not cleared. Its gate checklist still needs an independent
-re-run, the East red-team pass, and the four-seat signature.
+**SEL-1, experimental, gate not cleared.** By owner decision (recorded in the
+PR), the SEL-0 to SEL-1 gate was crossed and the model wired live in
+`embodied-service/`. The desk-gradable gates pass and the highest-severity
+boundary (crisis) is enforced in code as well as in the prompt. Sign-off is NOT
+complete: the live verifications (injection, soft self-claim, label durability
+under flow) and an independent re-grade of `sel1-v3` against the live service
+are still owed. The service surfaces this honestly at `/api/status` and in the
+UI. SEL-2 (trusted others) and SEL-3 (public) gates are unbuilt.
 
 ## What changes this card
 
