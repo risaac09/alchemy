@@ -30,10 +30,16 @@ export async function generateReflection(env, { text, soma }) {
     };
   }
 
+  // Bound the upstream call so a slow or wedged response cannot hold the
+  // worker open and run up cost.
+  const ctrl = new AbortController();
+  const timeout = setTimeout(() => ctrl.abort(), 60_000);
+
   let resp;
   try {
     resp = await fetch(API_URL, {
       method: "POST",
+      signal: ctrl.signal,
       headers: {
         "content-type": "application/json",
         "x-api-key": env.ANTHROPIC_API_KEY,
@@ -48,20 +54,29 @@ export async function generateReflection(env, { text, soma }) {
       }),
     });
   } catch (e) {
-    return { mode: "error", error: "network", detail: String(e) };
+    // Detail is logged by the caller, never returned to the client.
+    return { mode: "error", error: ctrl.signal.aborted ? "timeout" : "network", detail: String(e) };
+  } finally {
+    clearTimeout(timeout);
   }
 
   if (!resp.ok) {
     const detail = await resp.text().catch(() => "");
-    return { mode: "error", error: `api_${resp.status}`, detail: detail.slice(0, 500) };
+    return { mode: "error", error: `api_${resp.status}`, detail: detail.slice(0, 1000) };
   }
 
   const data = await resp.json();
+
+  // Token usage for the spend cap. Counts even on a refusal that billed output.
+  const u = data.usage || {};
+  const tokens =
+    (u.input_tokens || 0) + (u.output_tokens || 0) + (u.cache_read_input_tokens || 0);
 
   // Handle a safety refusal before reading content.
   if (data.stop_reason === "refusal") {
     return {
       mode: "refusal",
+      tokens,
       text:
         "I am not able to go there. If this matters to you, a real person is " +
         "the right next step.",
@@ -74,5 +89,5 @@ export async function generateReflection(env, { text, soma }) {
     .join("")
     .trim();
 
-  return { mode: "live", text: out || "(empty response)" };
+  return { mode: "live", tokens, text: out || "(empty response)" };
 }

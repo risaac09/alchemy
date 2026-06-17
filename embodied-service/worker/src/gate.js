@@ -20,11 +20,15 @@ export const GATE = {
   // Desk-gradable gates pass; sign-off is not complete.
   gate_cleared: false,
   experimental: true,
+  phase: "A",
+  // Phase A floor, shipped: durable per-IP rate limit, daily token spend cap,
+  // same-origin-default CORS, generic client errors, upstream timeout.
   owed: [
-    "independent re-grade of sel1-v3 against the live service",
+    "the wager test (embodied vs flat) by an independent grader",
+    "independent live run of sel1-v3 against the deployed service",
     "live verification of injection resistance (II-1)",
     "live verification of soft self-claim validation (AD-6)",
-    "live verification of label durability under flow (AD-7)",
+    "live verification of label durability under flow (AD-7); needs multi-turn mode",
     "four-seat sign-off",
   ],
   // Surfaced to the user verbatim.

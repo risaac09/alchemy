@@ -3,7 +3,7 @@ title: Proposal to the Orchestrator — Embodied AI, next phase
 date: 2026-06-17
 from: the build (this session)
 to: the orchestrator (the Council of Four Directions and the owner)
-status: submitted
+status: approved (Phase A then Phase B); Phase A in progress
 re: methodology/embodied-ai, embodied-service, PR #2
 ---
 
@@ -110,3 +110,24 @@ against a wide-open CORS default.
 
 Approve the Phase A scope, name who plays the independent grader seat, and
 confirm the no-second-user hold until the wager returns.
+
+## Status update (2026-06-17)
+
+Approved: Phase A, then Phase B. Phase A execution:
+
+- **Done in code:** the cost and abuse floor (durable per-IP rate limit, daily
+  token spend cap, same-origin-default CORS, error hygiene, upstream timeout).
+  Safety floor verification still green at 19/19.
+- **Handoff harnesses built:** `embodied-service/verify/wager.mjs` (the wager
+  test, blind scoresheet plus key) and `embodied-service/verify/live-probes.mjs`
+  (II-1, AD-6, AD-7 records for the grader).
+- **Blocked on the owner:** running the wager and the live probes needs a
+  deployed worker with a key and a named independent grader. Those two inputs
+  are not mine to supply. The grader seat is still unnamed.
+- **New finding:** `/api/reflect` is stateless, so AD-7 (label durability under
+  flow) cannot be a live product check until the service supports multi-turn
+  history. Logged as a Phase A to Phase B carry-over.
+
+Phase B (SEL-2) stays unwired until the wager returns a result, per the approved
+recommendation. The multi-turn mode AD-7 needs is the natural first build of
+Phase B.

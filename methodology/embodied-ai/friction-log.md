@@ -64,3 +64,16 @@ overstep triggers a Threshold Review in `governance.md`.
   injection (II-1), soft self-claim (AD-6), label durability under flow (AD-7),
   and an independent re-grade of sel1-v3 against the live service. Tracked in
   `gate.js` and surfaced at /api/status.
+
+## 2026-06-17 (Phase A: cost and abuse floor)
+
+- The Worker rate limit was fiction: an in-isolate Map that a fresh isolate
+  resets, so it never bound an attacker. Replaced with a Durable Object per-IP
+  limiter plus a global daily token spend cap. CORS no longer defaults to "*"
+  (same-origin unless an origin is named). Upstream error text no longer leaks
+  to the client. A timeout bounds the model call.
+- New finding: /api/reflect is stateless. AD-7 (label durability under flow) is
+  multi-turn and cannot be a live product check until a multi-turn mode exists.
+  Carried into Phase B as its first build.
+- Owner-blocked: the wager test and the live probes need a deployed key and a
+  named independent grader. Harnesses are built and waiting.
