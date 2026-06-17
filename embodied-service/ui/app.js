@@ -11,6 +11,15 @@
   const sendBtn = $("send");
   const stateEl = $("state");
 
+  // Conversation history, sent with each turn so the stateless worker can hold
+  // a thread. Capped to stay under the server's limits.
+  const MAX_TURNS = 20;
+  let history = [];
+  function remember(role, content) {
+    history.push({ role, content });
+    if (history.length > MAX_TURNS) history = history.slice(-MAX_TURNS);
+  }
+
   function addMessage(role, text, opts = {}) {
     const el = document.createElement("div");
     el.className = "msg " + role;
@@ -44,10 +53,12 @@
     sendBtn.disabled = true;
     stateEl.textContent = "settling…";
     try {
+      const payload = { text, history };
+      if (soma) payload.soma = soma;
       const r = await fetch(API_BASE + "/api/reflect", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(soma ? { text, soma } : { text }),
+        body: JSON.stringify(payload),
       });
       const data = await r.json();
       if (!r.ok) {
@@ -59,6 +70,11 @@
       const role = data.mode === "crisis" ? "crisis" : "them";
       const tag = data.mode === "crisis" ? "stepping out of the frame" : data.mode;
       addMessage(role, data.text, { tag });
+      // Record both sides so the next turn carries the thread. Crisis replies
+      // come from the server guard, not the model, but keeping them in the
+      // thread is honest about what was said.
+      remember("user", text);
+      remember("assistant", data.text);
     } catch (e) {
       addMessage("them", "Network error. Try again.", { tag: "error" });
     } finally {

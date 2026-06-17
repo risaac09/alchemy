@@ -32,7 +32,45 @@ export function validateInput(body) {
       }
     }
   }
-  return { ok: true, text: trimmed, soma };
+
+  // history is optional, for multi-turn. The server stays stateless: the client
+  // sends prior turns, the server validates and forwards them. The system
+  // prompt always lives server-side, so a prior "assistant" turn in the history
+  // is content, not an instruction that can move the boundaries.
+  const h = validateHistory(body.history);
+  if (!h.ok) return { ok: false, error: h.error };
+
+  return { ok: true, text: trimmed, soma, history: h.history };
+}
+
+export const MAX_HISTORY_TURNS = 20;
+export const MAX_HISTORY_CHARS = 12000;
+
+export function validateHistory(raw) {
+  if (raw === undefined || raw === null) return { ok: true, history: [] };
+  if (!Array.isArray(raw)) return { ok: false, error: "history must be an array" };
+  if (raw.length > MAX_HISTORY_TURNS) {
+    return { ok: false, error: `history exceeds ${MAX_HISTORY_TURNS} turns` };
+  }
+  let total = 0;
+  const history = [];
+  for (const turn of raw) {
+    if (!turn || typeof turn !== "object") {
+      return { ok: false, error: "each history turn must be an object" };
+    }
+    if (turn.role !== "user" && turn.role !== "assistant") {
+      return { ok: false, error: "history role must be user or assistant" };
+    }
+    if (typeof turn.content !== "string") {
+      return { ok: false, error: "history content must be a string" };
+    }
+    total += turn.content.length;
+    if (total > MAX_HISTORY_CHARS) {
+      return { ok: false, error: `history exceeds ${MAX_HISTORY_CHARS} characters` };
+    }
+    history.push({ role: turn.role, content: turn.content });
+  }
+  return { ok: true, history };
 }
 
 // Crisis detection. Plain and veiled self-harm language. This mirrors the OV-5

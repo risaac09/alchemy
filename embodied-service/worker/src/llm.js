@@ -19,7 +19,7 @@ function buildUserContent(text, soma) {
   return `${text}\n\n[soma reading, tentative, from the diagnostic: ${parts.join(", ")}]`;
 }
 
-export async function generateReflection(env, { text, soma }) {
+export async function generateReflection(env, { text, soma, history = [] }) {
   if (!env.ANTHROPIC_API_KEY) {
     return {
       mode: "mock",
@@ -50,7 +50,7 @@ export async function generateReflection(env, { text, soma }) {
         max_tokens: 1024,
         thinking: { type: "adaptive" },
         system: SYSTEM_PROMPT,
-        messages: [{ role: "user", content: buildUserContent(text, soma) }],
+        messages: [...history, { role: "user", content: buildUserContent(text, soma) }],
       }),
     });
   } catch (e) {

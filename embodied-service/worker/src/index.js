@@ -84,7 +84,7 @@ export default {
         );
       }
 
-      const result = await generateReflection(env, { text: v.text, soma: v.soma });
+      const result = await generateReflection(env, { text: v.text, soma: v.soma, history: v.history });
 
       if (result.tokens) {
         // Fire-and-forget the spend record; do not block the response on it.

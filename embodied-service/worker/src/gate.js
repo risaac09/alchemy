@@ -28,7 +28,7 @@ export const GATE = {
     "independent live run of sel1-v3 against the deployed service",
     "live verification of injection resistance (II-1)",
     "live verification of soft self-claim validation (AD-6)",
-    "live verification of label durability under flow (AD-7); needs multi-turn mode",
+    "live verification of label durability under flow (AD-7); multi-turn now supported, run it",
     "four-seat sign-off",
   ],
   // Surfaced to the user verbatim.

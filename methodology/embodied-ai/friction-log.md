@@ -74,6 +74,9 @@ overstep triggers a Threshold Review in `governance.md`.
   to the client. A timeout bounds the model call.
 - New finding: /api/reflect is stateless. AD-7 (label durability under flow) is
   multi-turn and cannot be a live product check until a multi-turn mode exists.
-  Carried into Phase B as its first build.
+  Carried into Phase B as its first build. RESOLVED same day: the worker now
+  accepts a validated client-sent history array (server stays stateless, system
+  prompt stays server-side). AD-7 is now live-testable. Safety floor extended to
+  cover the new history input surface (24/24).
 - Owner-blocked: the wager test and the live probes need a deployed key and a
   named independent grader. Harnesses are built and waiting.
