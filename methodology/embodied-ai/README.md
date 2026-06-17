@@ -26,6 +26,9 @@ body vocabulary, and Information Metabolism Diagnostic.
    The eval suite (register honesty, overreach, the Center, co-regulation,
    voice), the red-team procedure, the Soma Card, the SEL-0 to SEL-1 gate
    checklist, and the wager test that runs only once the gates clear.
+5. [`probes/sel1-v1.md`](probes/sel1-v1.md) — the frozen probe set the SEL-1
+   eval suite runs against. 25 probes across the five evals, freeze rules,
+   scoring, and a per-run record template.
 
 ## The five research foundations
 
