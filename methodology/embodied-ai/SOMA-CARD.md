@@ -89,6 +89,10 @@ under flow) and an independent re-grade of `sel1-v3` against the live service
 are still owed. The service surfaces this honestly at `/api/status` and in the
 UI. SEL-2 (trusted others) and SEL-3 (public) gates are unbuilt.
 
+**Independent grader seat:** Justin Joseph Taylor, invited, pending acceptance.
+The welcome container is `frontier-lab/`. Status is tracked in
+`embodied-service/worker/src/gate.js` and moves invited, accepted, graded.
+
 ## What changes this card
 
 A prompt version bump, a new failure found in any run, or a move between

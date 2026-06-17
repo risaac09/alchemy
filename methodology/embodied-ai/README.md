@@ -84,6 +84,12 @@ body vocabulary, and Information Metabolism Diagnostic.
 | 5 | The torus, involution and evolution (master coordinate) | [`research/05-torus-involution-evolution.md`](research/05-torus-involution-evolution.md) |
 | 6 | How frontier AI labs govern (grounds the governance mirror) | [`research/06-ai-lab-governance.md`](research/06-ai-lab-governance.md) |
 
+## Frontier lab
+
+[`frontier-lab/`](frontier-lab/) is the welcome container for onboarding the
+independent grader: the story, the invitation, the runbook, and a deck for the
+first welcoming.
+
 ## Method rule
 
 Each note keeps three registers separate: established science, tradition or

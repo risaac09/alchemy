@@ -21,6 +21,8 @@ export const GATE = {
   gate_cleared: false,
   experimental: true,
   phase: "A",
+  // The independent grader seat. Status moves invited -> accepted -> graded.
+  grader: { name: "Justin Joseph Taylor", status: "invited" },
   // Phase A floor, shipped: durable per-IP rate limit, daily token spend cap,
   // same-origin-default CORS, generic client errors, upstream timeout.
   owed: [
