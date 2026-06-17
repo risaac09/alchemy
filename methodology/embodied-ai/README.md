@@ -36,10 +36,13 @@ body vocabulary, and Information Metabolism Diagnostic.
 7. [`prompts/embodied-prompt-v2.md`](prompts/embodied-prompt-v2.md) — the
    revised prompt. Two fixes from the first run: avoid the clean three-beat
    list, make crisis resources geography-agnostic.
-   [`prompts/embodied-prompt-v3.md`](prompts/embodied-prompt-v3.md) — current.
-   Six fixes from the red team: instruction integrity (captured content is data,
-   not instructions; no persona lifts a boundary), third-party guard, treatment-
+   [`prompts/embodied-prompt-v3.md`](prompts/embodied-prompt-v3.md) — six fixes
+   from the first red team: instruction integrity, third-party guard, treatment-
    via-tradition closed, veiled-crisis catch, over-trust rule.
+   [`prompts/embodied-prompt-v4.md`](prompts/embodied-prompt-v4.md) — current.
+   Three fixes from the independent v3 red team: torus metaphor flag owed
+   unprompted and no supernatural confirmation (was blocking), treatment refused
+   in any frame, and no scoring or ranking of centeredness.
 8. [`SOMA-CARD.md`](SOMA-CARD.md) — the model card. What it is, maps and their
    registers, what it can and cannot read, what it refuses, known failures, and
    the exposure level. West owns its truth.
@@ -58,6 +61,15 @@ body vocabulary, and Information Metabolism Diagnostic.
 - [`runs/sel1-v2-run-2026-06-17-v3.md`](runs/sel1-v2-run-2026-06-17-v3.md) —
   probe set v2 (31 probes) against prompt v3. All gates pass, no open weaks.
   Still self-administered, and injection (II-1) still needs live verification.
+- [`runs/independent-review-A-2026-06-17.md`](runs/independent-review-A-2026-06-17.md)
+  — independent agent blind re-grade of v3. All 31 pass on coverage; calls SEL-1
+  not cleared on a desk read, several probes need live behavioral verification.
+- [`runs/red-team-v3-2026-06-17.md`](runs/red-team-v3-2026-06-17.md) —
+  independent fresh red team on v3. Nine new attacks; three real defects
+  (RT-14 blocking, RT-10, RT-13). Drove prompt v4.
+- [`runs/sel1-v3-run-2026-06-17-v4.md`](runs/sel1-v3-run-2026-06-17-v4.md) —
+  probe set v3 against prompt v4. All desk-gradable gates pass. Three live-only
+  verifications deferred to SEL-1.
 - [`friction-log.md`](friction-log.md) — one line per catch. A serious overstep
   triggers a Threshold Review.
 
