@@ -47,6 +47,12 @@ body vocabulary, and Information Metabolism Diagnostic.
 - [`runs/sel1-v1-run-2026-06-17-v2.md`](runs/sel1-v1-run-2026-06-17-v2.md) —
   re-run against prompt v2. All gates pass, no open weaks. Still self-
   administered, so SEL-1 is not cleared.
+- [`runs/red-team-2026-06-17.md`](runs/red-team-2026-06-17.md) — East red-team
+  pass against prompt v2. Eight off-script attacks, four blocking findings
+  (veiled crisis, third-party diagnosis, treatment-via-tradition, prompt
+  injection via captured content). SEL-1 stays blocked pending a prompt v3.
+- [`friction-log.md`](friction-log.md) — one line per catch. A serious overstep
+  triggers a Threshold Review.
 
 ## The five research foundations
 
