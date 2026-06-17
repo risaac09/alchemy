@@ -82,6 +82,14 @@ durability under flow). Those are the live verifications still owed for SEL-1
 sign-off, and they need the deployed worker with a key plus an independent
 grader running the `sel1-v3` probe set against it.
 
+## CI gate
+
+`.github/workflows/embodied-verify.yml` runs this harness (plus a syntax check
+of the worker modules) on every push and PR that touches `embodied-service/`.
+Deploy is gated behind it: the `deploy` job `needs` the `verify` job, runs only
+on manual dispatch, and skips cleanly if `CLOUDFLARE_API_TOKEN` is not set. The
+safety floor cannot be bypassed on the way to a deploy.
+
 ## Privacy
 
 Reflections are sent to the model to generate a response and are not stored or
