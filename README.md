@@ -47,7 +47,7 @@ A sixth view (`Diag`, keyboard `4`) offers a 12-question snapshot of how informa
 
 - **No accounts, no servers, no analytics.** Everything stays in localStorage (PWA) or `data.json` (plugin).
 - **Constraints are the product.** The 7-item cap, the decay, the settle period, the forced somatic check — these are features, not bugs. Don't ask for a way around them.
-- **Intentional friction over convenience.** The 30s settle, the body check, the one-question reflection — each removes a shortcut. The shortcut was the problem.
+- **Keep the center empty.** The 30s settle, the body check, the one-question reflection leave the captured thing alone with nothing. The nothing is the throat of the torus, where the thing stores and accelerates at once. Convenience fills the center and stops the circulation.
 - **Wabi-sabi, not SaaS.** Warm bark tones, worn field notebook aesthetic. No gradients, no streaks, no badges.
 - **Free forever.** Alchemy absorbs The Metabolizer ($29 Gumroad vault). Same philosophy, two surfaces, no paywall.
 

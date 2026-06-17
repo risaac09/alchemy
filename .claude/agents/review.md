@@ -9,7 +9,7 @@ You are reviewing the Alchemy codebase. Read CLAUDE.md first for design principl
 
 ### 1. Design principle violations
 - Any SaaS patterns creeping in (notification dots, streaks, gamification)
-- Convenience features that bypass intentional friction
+- Convenience features that fill the empty center or bypass the settle/reflect loop
 - Capacity limits being worked around
 - External service calls or analytics
 - Microcopy that sounds corporate or academic instead of direct/philosophical

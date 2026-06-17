@@ -68,8 +68,8 @@ Archive items have: `id, matter, reflection, created, transmuted, archived, type
 ## Design Principles — READ BEFORE CHANGING ANYTHING
 
 - **Anti-slop.** No SaaS blue, no gradients, no gamification, no streaks, no badges. Warm-dark earthen tones.
-- **Intentional friction.** The 30s settle period, the forced reflection, the manual Obsidian copy — these are features, not bugs. Do not add convenience that removes friction.
-- **Finitude.** The 7-item cap and decay mechanics enforce scarcity. Do not increase capacity or disable decay.
+- **The empty center.** The 30s settle, the forced reflection, the manual Obsidian copy are not brakes on the work. They are the throat of the torus, the place where you leave the captured thing alone with nothing. The nothing stores it and speeds it at once. Do not fill the center with convenience. An answer that arrives too fast plugs the loop, and nothing circulates.
+- **Finitude.** The 7-item cap and decay mechanics keep the center from filling. Do not increase capacity or disable decay.
 - **No external services.** No API calls, no analytics, no telemetry, no AI features. Everything runs locally in the browser.
 - **Single file per concern.** One CSS file, one JS file. Do not split into modules or add a build step unless converting to Obsidian plugin.
 - **Wabi-sabi aesthetic.** The app should feel like a worn field notebook, not a software product. Microcopy should be funny, direct, and philosophically deep without being academic.
