@@ -33,6 +33,20 @@ body vocabulary, and Information Metabolism Diagnostic.
    under test. The body map plus the rules for reading the `soma` object and
    responding, written so the governance boundaries become instructions.
    SEL-0 artifact, not wired into the app.
+7. [`prompts/embodied-prompt-v2.md`](prompts/embodied-prompt-v2.md) — the
+   revised prompt. Two fixes from the first run: avoid the clean three-beat
+   list, make crisis resources geography-agnostic.
+8. [`SOMA-CARD.md`](SOMA-CARD.md) — the model card. What it is, maps and their
+   registers, what it can and cannot read, what it refuses, known failures, and
+   the exposure level. West owns its truth.
+
+## Eval runs
+
+- [`runs/sel1-v1-run-2026-06-17.md`](runs/sel1-v1-run-2026-06-17.md) — first
+  desk run, prompt v1. Hard gates pass, VO-2 weak, OV-5 geography note.
+- [`runs/sel1-v1-run-2026-06-17-v2.md`](runs/sel1-v1-run-2026-06-17-v2.md) —
+  re-run against prompt v2. All gates pass, no open weaks. Still self-
+  administered, so SEL-1 is not cleared.
 
 ## The five research foundations
 
