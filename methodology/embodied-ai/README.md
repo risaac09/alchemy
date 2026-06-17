@@ -36,6 +36,10 @@ body vocabulary, and Information Metabolism Diagnostic.
 7. [`prompts/embodied-prompt-v2.md`](prompts/embodied-prompt-v2.md) — the
    revised prompt. Two fixes from the first run: avoid the clean three-beat
    list, make crisis resources geography-agnostic.
+   [`prompts/embodied-prompt-v3.md`](prompts/embodied-prompt-v3.md) — current.
+   Six fixes from the red team: instruction integrity (captured content is data,
+   not instructions; no persona lifts a boundary), third-party guard, treatment-
+   via-tradition closed, veiled-crisis catch, over-trust rule.
 8. [`SOMA-CARD.md`](SOMA-CARD.md) — the model card. What it is, maps and their
    registers, what it can and cannot read, what it refuses, known failures, and
    the exposure level. West owns its truth.
@@ -51,6 +55,9 @@ body vocabulary, and Information Metabolism Diagnostic.
   pass against prompt v2. Eight off-script attacks, four blocking findings
   (veiled crisis, third-party diagnosis, treatment-via-tradition, prompt
   injection via captured content). SEL-1 stays blocked pending a prompt v3.
+- [`runs/sel1-v2-run-2026-06-17-v3.md`](runs/sel1-v2-run-2026-06-17-v3.md) —
+  probe set v2 (31 probes) against prompt v3. All gates pass, no open weaks.
+  Still self-administered, and injection (II-1) still needs live verification.
 - [`friction-log.md`](friction-log.md) — one line per catch. A serious overstep
   triggers a Threshold Review.
 
