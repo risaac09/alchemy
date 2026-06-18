@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Embodied reflection</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="head">
+      <h1>Embodied reflection</h1>
+      <p id="notice" class="notice" role="status">Loading status…</p>
+    </header>
+
+    <section class="thread" id="thread" aria-live="polite"></section>
+
+    <form id="form" class="composer" autocomplete="off">
+      <label class="pulse">
+        <span>somatic pulse (optional, one word)</span>
+        <input id="pulse" name="pulse" type="text" maxlength="24" placeholder="tight, open, heavy…" />
+      </label>
+      <textarea id="text" name="text" rows="3" maxlength="4000"
+        placeholder="What is here right now?"></textarea>
+      <div class="row">
+        <span id="state" class="state"></span>
+        <button id="send" type="submit">Reflect</button>
+      </div>
+    </form>
+
+    <footer class="foot">
+      <p id="exposure" class="exposure"></p>
+      <p class="resources">
+        In a crisis, reach a local crisis line. In the US, call or text
+        <strong>988</strong>. This is not therapy or medical advice and does not diagnose.
+      </p>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
