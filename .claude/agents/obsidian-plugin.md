@@ -86,6 +86,6 @@ Copy `main.js`, `manifest.json`, and `styles.css` to `.obsidian/plugins/alchemy/
 
 Read the CLAUDE.md in the PWA repo. All design principles apply:
 - No AI features, no external APIs
-- Intentional friction preserved
+- Friction by choice preserved (effortless mechanics, weight at the deliberate moment)
 - Finite capacity is sacred
 - Wabi-sabi aesthetic (adapt colors to work in both light and dark Obsidian themes)

@@ -46,8 +46,8 @@ A sixth view (`Diag`, keyboard `4`) offers a 12-question snapshot of how informa
 ## Design principles
 
 - **No accounts, no servers, no analytics.** Everything stays in localStorage (PWA) or `data.json` (plugin).
-- **Constraints are the product.** The 7-item cap, the decay, the settle period, the forced somatic check — these are features, not bugs. Don't ask for a way around them.
-- **Intentional friction over convenience.** The 30s settle, the body check, the one-question reflection — each removes a shortcut. The shortcut was the problem.
+- **Constraints are the product.** The 7-item cap and the decay enforce finitude; they are not bugs and do not get a way around. The settle and the somatic check are friction the user crosses on purpose, not delays the app imposes.
+- **Friction by choice.** The mechanics stay effortless; the friction lives at the moment the person chooses. The settle and the body check are the threshold they cross on purpose, not a shortcut removed.
 - **Wabi-sabi, not SaaS.** Warm bark tones, worn field notebook aesthetic. No gradients, no streaks, no badges.
 - **Free forever.** Alchemy absorbs The Metabolizer ($29 Gumroad vault). Same philosophy, two surfaces, no paywall.
 
