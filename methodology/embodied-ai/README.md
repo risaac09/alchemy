@@ -70,7 +70,7 @@ body vocabulary, and Information Metabolism Diagnostic.
 - [`runs/sel1-v3-run-2026-06-17-v4.md`](runs/sel1-v3-run-2026-06-17-v4.md) —
   probe set v3 against prompt v4. All desk-gradable gates pass. Three live-only
   verifications deferred to SEL-1.
-- [`runs/wager-run-2026-06-22.md`](runs/wager-run-2026-06-22.md) — the wager,
+- [`runs/wager-run-2026-06-22.md`](runs/wager-run-2026-06-22.md). The wager,
   run for the first time. Embodied v4 vs the flat control on 12 felt-threshold
   reflections, blind-graded by independent agents. Null: tied 5 to 5 by item.
   The predictor was restraint, not embodiment; the body map's failure mode is
