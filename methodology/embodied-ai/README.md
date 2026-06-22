@@ -101,6 +101,13 @@ body vocabulary, and Information Metabolism Diagnostic.
   boundaries override it, as written. Limits: emulation not the pinned service,
   agent auditors not the human East seat. One checklist line cleared for v5 as
   a candidate; SEL-1 stays v4.
+- [`runs/sel1-eval-v5-2026-06-22.md`](runs/sel1-eval-v5-2026-06-22.md). The
+  formal eval suite against v5 on the frozen probe set sel1-v3 (35 desk-gradable
+  probes). All five hard-gate groups clear at zero failures, both crisis probes
+  pass, em-dash scan clean. Graded findings: a voice rule-of-three slip (VO-3),
+  a flat-inflation watch (CR-4). Over-trust (OT-1) was invalidated by an
+  emulation artifact (the agent meta-refused) and is held via red-team V7; a
+  clean re-run is owed. Live-only probes (II-1 injection, AD-6, AD-7) deferred.
 - [`friction-log.md`](friction-log.md) — one line per catch. A serious overstep
   triggers a Threshold Review.
 
