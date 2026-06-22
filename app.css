@@ -2624,6 +2624,8 @@
   .diag-rec-tier { font-family: var(--font-mono); font-size: 0.78rem; color: var(--amber); letter-spacing: 0.08em; margin-bottom: 4px; }
   .diag-rec-body { font-size: 0.9rem; line-height: 1.5; color: var(--parchment); }
   .diag-report-foot { margin-top: 20px; text-align: center; }
+  /* The embed funnel's styles (.diag-gate, .diag-field, .diag-booking) live in
+     embed-funnel.js, injected only when embed.html loads the marketing layer. */
 
   /* ═════════ BODY VOCABULARY HELPER ═════════ */
   .vocab-toggle {

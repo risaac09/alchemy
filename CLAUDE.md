@@ -11,14 +11,17 @@ An antechamber for information metabolism. Absorbs The Metabolizer. Two products
 ## Architecture
 
 ```
-index.html  — DOM structure, PWA meta tags, ARIA attributes (~246 lines)
-app.css     — All styles, CSS variables, animations, responsive breakpoints (~2075 lines)
-app.js      — All logic in a single IIFE (~2039 lines)
-sw.js       — Service worker, cache-first for shell + fonts (68 lines)
-test.js     — jsdom-based test suite (~950 lines)
-manifest.json — PWA config, share target
-icon-*.png  — App icons (192, 512)
+index.html      — DOM structure, PWA meta tags, ARIA attributes (~308 lines)
+app.css         — All styles, CSS variables, animations, responsive breakpoints
+app.js          — All logic in a single IIFE; the free, account-less tool
+embed-funnel.js — Marketing/lead-capture layer (name, email gate, booking CTA, lead postMessages + its own CSS). Loaded ONLY by embed.html. The free PWA never includes it.
+sw.js           — Service worker, cache-first for shell + fonts
+test.js         — jsdom-based test suite
+manifest.json   — PWA config, share target
+icon-*.png      — App icons (192, 512)
 ```
+
+**Surface separation (2026-06-22):** `index.html` (the free PWA) loads `app.js` only. `embed.html` (the marketing iframe on rubinsteinproductions.com/services) loads `embed-funnel.js` + `app.js`. The diagnostic in app.js calls optional `window.AlchemyEmbedFunnel` hooks if present (`landingField`, `onStart`, `wantsGate`, `gateView`, `reportExtra`, `onComplete`, `handleAction`); with no funnel loaded it runs as the pure tool. No sales/lead-capture code lives in app.js.
 
 No build. No bundler. Edit the files directly and push.
 
@@ -37,6 +40,7 @@ v1.3.0 additions:
 - **Post-keep rubric** — 5-dim self-rating (clarity, integrity, somatic, transmutation, release) fires once when Keeping an item. 1–5 per dim + optional note. Dismissible (archives without scores). Adapted from `methodology/evaluation-framework.md`.
 - **Diagnostic view** — 6th view (`Diag` tab, keyboard `4`). 12-question Information Metabolism assessment absorbed from `alchemy-diagnostic`. 4 axes (intake/transformation/expression/returnFlow), 2×2 quadrant placement (Stagnant/Drowning/Distilling/Thriving), SVG radar + placement map. Results persist in `state.diagnostic`, surface on the Log as "Metabolism placement".
 - **Embed mode** — `embed.html` shows only the diagnostic view; body.embed CSS hides chrome; `body[data-embed="true"]` skips SW registration and onboarding. Posts `{type:'height'}` and `{type:'diagnostic-complete',scores,quadrant}` to parent frame.
+- **Embed lead-capture funnel** (`embed-funnel.js`, loaded only by embed.html) — the marketing iframe adds a name field on the landing, an `embed-gate` view between Q12 and the report, and a booking CTA (`mailto:isaac@rubinsteinproductions.com`) on the report. The main accountless PWA never loads the file, so it never shows any of these. The email is never stored or sent by the app: the funnel `postMessage`s `{type:'started'}`, `{type:'email',email}`, and `{type:'complete',scores,quadrant}` to the host frame, which owns capture (app.js still posts the generic `{type:'height'}` and `{type:'diagnostic-complete'}`). Consolidated from the standalone `alchemy-diagnostic` repo 2026-06-22, then split into `embed-funnel.js` so app.js carries no sales code; that standalone repo is now redundant and should be archived.
 
 The original loop: **Capture (Inhale) → Reflect (Pause) → Transform (Alchemize) → Release (Exhale)**
 
@@ -102,11 +106,11 @@ The Rubric form intercepts the Keep → Archive transition. Esc or click-outside
 
 ## Deployment
 
-Push to `main`. GitHub Pages auto-deploys. Service worker cache version is `alchemy-v7` — bump this in `sw.js` when deploying breaking changes to force cache refresh. Bump `VERSION` in app.js for feature additions.
+Push to `main`. GitHub Pages auto-deploys. Service worker cache version is `alchemy-v14` — bump this in `sw.js` when deploying breaking changes to force cache refresh. Bump `VERSION` in app.js for feature additions.
 
 ## Testing
 
-Run `node test.js` (requires `npm i jsdom`). 36 tests, 142 assertions covering state machine, capture, decay, reflection, archiving, resurfacing, export/import, share target, keyboard shortcuts, ARIA attributes, bulk release, sparkline, and notifications.
+Run `node test.js` (or `npm test`; requires `npm i jsdom`). 197 assertions covering state machine, capture, decay, reflection, archiving, resurfacing, export/import, share target, keyboard shortcuts, ARIA attributes, bulk release, sparkline, notifications, diagnostic scoring, rubric, and the embed lead-capture funnel.
 
 Key flows to also verify manually in browser:
 1. Capture text -> appears in inbox with settle countdown

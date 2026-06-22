@@ -1,10 +1,11 @@
-const CACHE_NAME = 'alchemy-v13';
+const CACHE_NAME = 'alchemy-v14';
 const ASSETS = [
   '.',
   'index.html',
   'embed.html',
   'app.css',
   'app.js',
+  'embed-funnel.js',
   'manifest.json',
   'icon-192.png',
   'icon-512.png'

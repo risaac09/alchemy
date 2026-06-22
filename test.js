@@ -16,6 +16,7 @@ const { JSDOM } = require('jsdom');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(__dirname, 'app.css'), 'utf8');
 const js = fs.readFileSync(path.join(__dirname, 'app.js'), 'utf8');
+const embedFunnelJs = fs.readFileSync(path.join(__dirname, 'embed-funnel.js'), 'utf8');
 
 let passed = 0;
 let failed = 0;
@@ -43,19 +44,24 @@ function assertEqual(actual, expected, name) {
   }
 }
 
-function createApp(seedState, urlParams) {
+function createApp(seedState, urlParams, opts) {
+  opts = opts || {};
   const url = urlParams
     ? `http://localhost:8420/?${urlParams}`
     : 'http://localhost:8420/';
 
-  // Inject seed state before app.js runs by prepending a localStorage write
+  // Inject seed state before app.js runs by prepending a localStorage write.
+  // opts.embed flips the body into marketing-embed mode before app.js reads it.
   const seedScript = seedState
     ? `localStorage.setItem('alchemy_v2', ${JSON.stringify(JSON.stringify(seedState))});`
     : '';
+  const embedScript = opts.embed ? `document.body.dataset.embed='true';` : '';
+  // In embed mode, load the marketing funnel layer the way embed.html does.
+  const funnelScript = opts.embed ? embedFunnelJs : '';
 
   const fullHtml = html
     .replace('<link rel="stylesheet" href="app.css">', `<style>${css}</style>`)
-    .replace('<script src="app.js"></script>', `<script>${seedScript}\n${js}</script>`);
+    .replace('<script src="app.js"></script>', `<script>${embedScript}\n${funnelScript}\n${seedScript}\n${js}</script>`);
 
   const dom = new JSDOM(fullHtml, {
     url,
@@ -1101,7 +1107,7 @@ function testVersionDisplay() {
   doc.getElementById('navLog').click();
   const version = doc.querySelector('.log-version');
   assert(version !== null, 'Version element in log');
-  assert(version.textContent.includes('1.3.1'), 'Version shows 1.3.1');
+  assert(version.textContent.includes('1.4.0'), 'Version shows 1.4.0');
 
   dom.window.close();
 }
@@ -1423,6 +1429,91 @@ function testDiagnosticTunesCap() {
   dom.window.close();
 }
 
+// ═══════════════════════════════════════════════
+//  TEST: Embed funnel — name field + email gate before report
+// ═══════════════════════════════════════════════
+function testEmbedDiagnosticFunnel() {
+  const dom = createApp(null, null, { embed: true });
+  const doc = dom.window.document;
+
+  doc.getElementById('navDiagnostic').click();
+  // Landing shows the embed-only name field
+  const nameInput = doc.getElementById('diag-name');
+  assert(nameInput, 'Embed landing shows name field');
+  nameInput.value = 'Sarah';
+
+  doc.querySelector('[data-diag="start"]').click();
+  for (let i = 0; i < 12; i++) {
+    doc.querySelector('.diag-opt[data-value="5"]').click();
+    doc.querySelector('[data-diag="next"]').click();
+  }
+
+  // After the last question we land on the email gate, NOT the report
+  assert(doc.querySelector('.diag-gate'), 'Embed lands on email gate after Q12');
+  assert(!doc.querySelector('.diag-report'), 'Report is gated until email step');
+  assert(!getState(dom).diagnostic, 'Results not committed before gate cleared');
+  // Greeting carries the captured name
+  assert(doc.querySelector('.diag-heading').textContent.includes('Sarah'), 'Gate greets by name');
+
+  // Provide an email and continue
+  doc.getElementById('diag-gate-email').value = 'sarah@example.com';
+  doc.querySelector('[data-diag="show-report"]').click();
+
+  assert(doc.querySelector('.diag-report'), 'Report renders after email submit');
+  assert(doc.querySelector('.diag-booking'), 'Embed report shows booking CTA');
+  const state = getState(dom);
+  assert(state.diagnostic !== null, 'Results committed after gate');
+  assertEqual(state.diagnostic.quadrant, 'Thriving', 'All-5s still maps to Thriving in embed');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Embed funnel — Skip bypasses email, still reports
+// ═══════════════════════════════════════════════
+function testEmbedDiagnosticSkip() {
+  const dom = createApp(null, null, { embed: true });
+  const doc = dom.window.document;
+
+  doc.getElementById('navDiagnostic').click();
+  doc.querySelector('[data-diag="start"]').click();
+  for (let i = 0; i < 12; i++) {
+    doc.querySelector('.diag-opt[data-value="1"]').click();
+    doc.querySelector('[data-diag="next"]').click();
+  }
+  assert(doc.querySelector('.diag-gate'), 'Gate shown before skip');
+  doc.querySelector('[data-diag="skip-email"]').click();
+
+  assert(doc.querySelector('.diag-report'), 'Report renders after skip');
+  assertEqual(getState(dom).diagnostic.quadrant, 'Stagnant', 'Skip still commits results');
+
+  dom.window.close();
+}
+
+// ═══════════════════════════════════════════════
+//  TEST: Non-embed diagnostic stays accountless (no funnel)
+// ═══════════════════════════════════════════════
+function testNonEmbedDiagnosticHasNoFunnel() {
+  const dom = createApp();
+  const doc = dom.window.document;
+
+  doc.getElementById('navDiagnostic').click();
+  assert(!doc.getElementById('diag-name'), 'Main PWA landing has no name field');
+
+  doc.querySelector('[data-diag="start"]').click();
+  for (let i = 0; i < 12; i++) {
+    doc.querySelector('.diag-opt[data-value="5"]').click();
+    doc.querySelector('[data-diag="next"]').click();
+  }
+  // No gate — straight to report, results committed immediately
+  assert(!doc.querySelector('.diag-gate'), 'Main PWA never shows email gate');
+  assert(doc.querySelector('.diag-report'), 'Main PWA goes straight to report');
+  assert(!doc.querySelector('.diag-booking'), 'Main PWA report has no booking CTA');
+  assert(getState(dom).diagnostic !== null, 'Results committed without a gate');
+
+  dom.window.close();
+}
+
 const tests = [
   ['Fresh load', testFreshLoad],
   ['Capture', testCapture],
@@ -1469,6 +1560,9 @@ const tests = [
   ['Diagnostic Log placement', testDiagnosticLogPlacement],
   ['Diagnostic retake', testDiagnosticRetake],
   ['Diagnostic tunes inbox cap', testDiagnosticTunesCap],
+  ['Embed funnel — name + email gate', testEmbedDiagnosticFunnel],
+  ['Embed funnel — skip email', testEmbedDiagnosticSkip],
+  ['Non-embed diagnostic has no funnel', testNonEmbedDiagnosticHasNoFunnel],
 ];
 
 for (const [name, fn] of tests) {

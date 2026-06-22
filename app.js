@@ -4,7 +4,7 @@
   // ═══════════════════════════════════════════════
   //  THERMODYNAMIC CONSTANTS
   // ═══════════════════════════════════════════════
-  const VERSION = '1.3.1';
+  const VERSION = '1.4.0';
   const BASE_MAX_CAPACITY = 7;     // Cassette tape finitude (default)
   let MAX_CAPACITY = BASE_MAX_CAPACITY; // Mutated by diagnostic-reactive tuning
   const DECAY_MS = 72 * 3600000;   // 72 hours to full decay
@@ -2458,7 +2458,16 @@
   ];
 
   const diagRoot = $('diagnosticRoot');
-  let diagState = { view: 'landing', index: 0, answers: {} };
+  // view: landing | question | embed-gate (funnel only) | report
+  let diagState = { view: 'landing', index: 0, answers: {}, name: '', email: '' };
+
+  // Optional embed lead-capture layer. The free PWA carries none of it: the name
+  // field, email gate, booking CTA, and lead postMessages all live in
+  // embed-funnel.js, which only embed.html loads. When that file is absent these
+  // hooks are undefined and the diagnostic runs as the pure, accountless tool.
+  function embedFunnel() {
+    return (typeof window !== 'undefined' && window.AlchemyEmbedFunnel) || null;
+  }
 
   function diagMean(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
 
@@ -2565,12 +2574,16 @@
     const priorLine = state.diagnostic
       ? `<p class="diag-prior">Last taken ${new Date(state.diagnostic.takenAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} — placement was <strong>${escapeHtml(state.diagnostic.quadrant)}</strong>. Retaking will overwrite.</p>`
       : '';
+    // Name field only on the marketing embed; the funnel layer provides it.
+    const f = embedFunnel();
+    const nameField = f && f.landingField ? f.landingField(diagState) : '';
     return `<div class="diag-landing">
       <div class="diag-eyebrow">INFORMATION METABOLISM</div>
       <h2 class="diag-heading">Diagnostic</h2>
       <p class="diag-lede">A 12-question snapshot of how information moves through your system. Pipe or torus?</p>
       <ul class="diag-meta"><li>Twelve questions</li><li>About four minutes</li><li>Stored only on this device</li></ul>
       ${priorLine}
+      ${nameField}
       <button class="diag-btn-primary" data-diag="start">${state.diagnostic ? 'Retake' : 'Begin'}</button>
       ${state.diagnostic ? '<button class="diag-btn-ghost" data-diag="show-report">See last report</button>' : ''}
     </div>`;
@@ -2626,6 +2639,7 @@
       </div>
       <div class="diag-findings"><div class="diag-section-title">KEY FINDINGS</div><ul>${findingsHtml}</ul></div>
       <div class="diag-recs"><div class="diag-section-title">NEXT STEPS</div>${recsHtml}</div>
+      ${(() => { const f = embedFunnel(); return f && f.reportExtra ? f.reportExtra(d) : ''; })()}
       <div class="diag-report-foot"><button class="diag-btn-ghost" data-diag="restart">↻ Start over</button></div>
     </div>`;
   }
@@ -2635,6 +2649,7 @@
     let html = '';
     if (diagState.view === 'landing') html = diagRenderLanding();
     else if (diagState.view === 'question') html = diagRenderQuestion();
+    else if (diagState.view === 'embed-gate') { const f = embedFunnel(); html = f && f.gateView ? f.gateView(diagState) : ''; }
     else if (diagState.view === 'report') html = diagRenderReport();
     diagRoot.innerHTML = html;
     try { window.parent && window.parent !== window && window.parent.postMessage({ type: 'height', px: document.documentElement.scrollHeight }, '*'); } catch (e) {}
@@ -2648,11 +2663,18 @@
     applyDiagnosticTuning();
     updateCounts();
     try { window.parent && window.parent !== window && window.parent.postMessage({ type: 'diagnostic-complete', scores, quadrant: q.name }, '*'); } catch (e) {}
+    const f = embedFunnel();
+    if (f && f.onComplete) f.onComplete(scores, q.name); // funnel posts its lead 'complete'
   }
 
   function diagHandle(action, target) {
+    // The embed funnel claims its own actions (the email gate's skip / submit).
+    const f = embedFunnel();
+    if (f && f.handleAction && f.handleAction(action, target, { diagState, commit: diagCommitResults, render: renderDiagnostic })) return;
+
     if (action === 'start') {
-      diagState = { view: 'question', index: 0, answers: {} };
+      const r = f && f.onStart ? f.onStart() : null; // funnel reads the name + posts 'started'
+      diagState = { view: 'question', index: 0, answers: {}, name: (r && r.name) || '', email: '' };
       renderDiagnostic();
     } else if (action === 'answer') {
       const val = parseInt(target.dataset.value, 10);
@@ -2662,6 +2684,10 @@
       if (diagState.index < DIAG_QUESTIONS.length - 1) {
         diagState.index++;
         renderDiagnostic();
+      } else if (f && f.wantsGate && f.wantsGate()) {
+        // Marketing surface: collect an email before revealing the report.
+        diagState.view = 'embed-gate';
+        renderDiagnostic();
       } else {
         diagCommitResults();
         diagState.view = 'report';
@@ -2670,9 +2696,11 @@
     } else if (action === 'back') {
       if (diagState.index > 0) { diagState.index--; renderDiagnostic(); }
     } else if (action === 'restart') {
-      diagState = { view: 'landing', index: 0, answers: {} };
+      diagState = { view: 'landing', index: 0, answers: {}, name: '', email: '' };
       renderDiagnostic();
     } else if (action === 'show-report') {
+      // Landing "See last report" — results already committed. (The gate's
+      // own show-report is intercepted by the funnel above.)
       diagState.view = 'report';
       renderDiagnostic();
     }
@@ -2688,6 +2716,10 @@
 
   document.addEventListener('keydown', (e) => {
     if (currentView !== 'diagnostic') return;
+    if (diagState.view === 'embed-gate') {
+      if (e.key === 'Enter') { e.preventDefault(); diagHandle('show-report'); }
+      return;
+    }
     const tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea') return;
     if (diagState.view === 'question') {

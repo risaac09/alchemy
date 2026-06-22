@@ -1,22 +1,22 @@
 {
   "name": "alchemy",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/risaac09/alchemy.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["pwa", "obsidian", "knowledge-management", "information-metabolism", "vanilla-js"],
+  "author": "Isaac Rubinstein",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/risaac09/alchemy/issues"
   },
   "homepage": "https://github.com/risaac09/alchemy#readme",
-  "description": "",
+  "description": "An antechamber for your information metabolism. A digital liver for what you read — vanilla-JS PWA, no build step, no servers.",
   "devDependencies": {
     "jsdom": "^29.0.1"
   }
