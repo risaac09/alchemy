@@ -84,6 +84,14 @@ body vocabulary, and Information Metabolism Diagnostic.
   can tip into absence (v5 lost all 3 of its losses there). Points at a v6
   (arousal-calibrated restraint). v5 is an SEL-0 candidate, not red-teamed,
   not deployed; deployed SEL-1 stays v4.
+- [`runs/wager-run-v6-2026-06-22.md`](runs/wager-run-v6-2026-06-22.md). v6
+  (arousal-calibrated restraint) vs v5. A wash: 17-18, six item-wins each. v6
+  won the quiet items it targeted (6-3) but gave it back on the charged ones
+  (11-15), because its added presence generalized into length and lost to v5's
+  economy. v5 stands as the lead candidate. The finding: economy is the
+  baseline, and quiet states are not uniform, so add presence only to name a
+  specific edge. Diminishing returns against synthetic graders; the real Phase
+  A run on Isaac's entries with a human grader is the owed next move.
 - [`friction-log.md`](friction-log.md) — one line per catch. A serious overstep
   triggers a Threshold Review.
 
