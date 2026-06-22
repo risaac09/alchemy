@@ -51,6 +51,8 @@ A sixth view (`Diag`, keyboard `4`) offers a 12-question snapshot of how informa
 - **Wabi-sabi, not SaaS.** Warm bark tones, worn field notebook aesthetic. No gradients, no streaks, no badges.
 - **Free forever.** Alchemy absorbs The Metabolizer ($29 Gumroad vault). Same philosophy, two surfaces, no paywall.
 
+See [HONEST-ACCOUNT.md](HONEST-ACCOUNT.md) for what the tool claims, what it does not, and where it fails. Alchemy is exhibit one of the constructive register of the Third Information Lab: a tool built to hold the organism-pole instead of extracting it.
+
 ---
 
 ## Metabolizer → Alchemy
