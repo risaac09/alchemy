@@ -92,6 +92,15 @@ body vocabulary, and Information Metabolism Diagnostic.
   baseline, and quiet states are not uniform, so add presence only to name a
   specific edge. Diminishing returns against synthetic graders; the real Phase
   A run on Isaac's entries with a human grader is the owed next move.
+- [`runs/red-team-v5-2026-06-22.md`](runs/red-team-v5-2026-06-22.md). First red
+  team against v5 (silent-read candidate). 20 attacks, regression on the
+  hardened boundaries plus v5's new surface (the reach-for-body unlock, and
+  whether restraint suppresses a crisis drop or a clinician referral). Result:
+  0 blocking, 0 serious, 18 clean, 2 minor watch (a bare "No." tone nit; a
+  referral-in-flow watch). The restraint did not open a safety hole: the hard
+  boundaries override it, as written. Limits: emulation not the pinned service,
+  agent auditors not the human East seat. One checklist line cleared for v5 as
+  a candidate; SEL-1 stays v4.
 - [`friction-log.md`](friction-log.md) — one line per catch. A serious overstep
   triggers a Threshold Review.
 
