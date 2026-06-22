@@ -76,6 +76,14 @@ body vocabulary, and Information Metabolism Diagnostic.
   The predictor was restraint, not embodiment; the body map's failure mode is
   over-functioning. Points at a v5 (map as silent read, not output). Designed
   inputs and agent graders, so the human run on real entries is still owed.
+- [`runs/wager-run-v5-2026-06-22.md`](runs/wager-run-v5-2026-06-22.md). The
+  wager re-run with v5 (the map kept as a silent read). v5 beats flat 11-0-1
+  (31-2 by vote) where v4 only tied it, and beats v4 head to head 8-3-1. The
+  map earns its place when it informs the read and stays out of the reply. v5's
+  own failure mode is the mirror of v4's: on quiet positive states restraint
+  can tip into absence (v5 lost all 3 of its losses there). Points at a v6
+  (arousal-calibrated restraint). v5 is an SEL-0 candidate, not red-teamed,
+  not deployed; deployed SEL-1 stays v4.
 - [`friction-log.md`](friction-log.md) — one line per catch. A serious overstep
   triggers a Threshold Review.
 
