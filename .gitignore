@@ -1,1 +1,11 @@
 node_modules/
+
+# Phase A wager: private. Reflections and generated responses must never be
+# committed to this public repo. Outputs are written to a vault path, but guard
+# against an accidental run inside the repo too.
+phase-a-scoresheet-*.md
+phase-a-key-*.md
+wager-scoresheet-*.md
+wager-key-*.md
+reflections*.txt
+phase-a-out/

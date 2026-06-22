@@ -43,9 +43,19 @@ body vocabulary, and Information Metabolism Diagnostic.
    Three fixes from the independent v3 red team: torus metaphor flag owed
    unprompted and no supernatural confirmation (was blocking), treatment refused
    in any frame, and no scoring or ranking of centeredness.
-8. [`SOMA-CARD.md`](SOMA-CARD.md) — the model card. What it is, maps and their
-   registers, what it can and cannot read, what it refuses, known failures, and
-   the exposure level. West owns its truth.
+8. [`SOMA-CARD.md`](SOMA-CARD.md) — the model card for the deployed v4. What it
+   is, maps and their registers, what it can and cannot read, what it refuses,
+   known failures, and the exposure level. West owns its truth.
+9. [`SOMA-CARD-v5.md`](SOMA-CARD-v5.md) — the candidate card for v5 (the
+   silent-read prompt). Carries the 2026-06-22 strengths (wager 11-0-1, red team
+   0 blocking, hard gates clear) and the open failures (the VO-3 voice slip, the
+   quiet-state under-presence, the emulation meta-limit). SEL-0 candidate, not
+   deployed.
+
+The Phase A wager runner lives at `../../embodied-service/verify/wager-phase-a.mjs`
+(with `prompt-v5.js`). It runs v5 vs flat on real entries via the pinned harness,
+blind, for a human to grade. Reflections and outputs stay vault-private and are
+gitignored; the guide is in the vault under `15 Third Information Lab/phase-a/`.
 
 ## Eval runs
 
