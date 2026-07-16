@@ -1,5 +1,7 @@
 # Alchemy Integration Plan
 
+**STATUS: COMPLETE (kept as history).** The diagnostic merged into alchemy as the Diag view in v1.3.0, and the embed funnel split out as `embed-funnel.js` on 2026-06-22. The standalone alchemy-diagnostic repo is archived. Nothing below is pending work; see CLAUDE.md for the current architecture.
+
 Generated 2026-04-22. Covers merging alchemy, alchemy-diagnostic, and the-metabolizer.
 
 ## Status
