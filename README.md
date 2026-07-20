@@ -90,10 +90,10 @@ No build step for the PWA. Edit files directly and push.
 
 ```
 index.html     — DOM structure
-app.css        — All styles (~2200 lines)
-app.js         — All logic, single IIFE (~2100 lines)
+app.css        — All styles (~2650 lines)
+app.js         — All logic, single IIFE (~2740 lines)
 sw.js          — Service worker, cache-first
-test.js        — jsdom test suite (142 assertions)
+test.js        — jsdom test suite (197 assertions)
 obsidian-plugin/
   main.ts      — Plugin class + AlchemyView + settings tab
   styles.css   — Scoped plugin styles
@@ -110,7 +110,7 @@ node esbuild.config.mjs production
 ```
 
 **Deploy PWA:** push to `main` — GitHub Pages auto-deploys.
-Service worker cache version is `alchemy-v7` in `sw.js` — bump on breaking changes.
+Service worker cache version lives in `sw.js` (currently `alchemy-v14`) — bump on breaking changes.
 
 ## License
 
