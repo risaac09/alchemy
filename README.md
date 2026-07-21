@@ -112,6 +112,10 @@ node esbuild.config.mjs production
 **Deploy PWA:** push to `main` — GitHub Pages auto-deploys.
 Service worker cache version lives in `sw.js` (currently `alchemy-v14`) — bump on breaking changes.
 
+## Contributing
+
+Forks welcome. Pull requests are generally not reviewed: this is a personal tool with deliberate constraints (the 7-item cap, the settle timer, the decay), so fork it and make it yours.
+
 ## License
 
 MIT, see `LICENSE`.
