@@ -2,7 +2,7 @@ Run a comprehensive review of the Alchemy codebase.
 
 Read CLAUDE.md first for design principles, then audit:
 
-1. **Design principle violations** — any SaaS patterns, gamification, a filled-in center (convenience that removes the settle/reflect loop), external calls
+1. **Design principle violations** — any SaaS patterns, gamification, friction removed from the user's deliberate moment (or friction left in the mechanics), external calls
 2. **Bugs** — state mutations without save, missing DOM refs, regex issues, quota handling
 3. **UX** — touch targets, text sizes, reduced-motion, color contrast, keyboard accessibility
 4. **Performance** — unnecessary re-renders, localStorage bloat, backgrounded tab behavior

@@ -12,7 +12,7 @@ You are adding a feature to Alchemy, a single-page vanilla JS PWA for intentiona
 3. Key constraints to internalize:
    - No frameworks, no build step, no npm
    - No external API calls, no AI, no analytics
-   - The empty center is the point — do not add convenience that fills it or bypasses the reflect/release loop
+   - Friction lives at the user's deliberate moment (the reflect/release loop), not in the mechanics. Make the mechanics effortless; keep the threshold weighted
    - The 7-item capacity cap is sacred — do not increase it
    - Aesthetic: warm-dark earthen tones (#2D2A26, #E6E2D3, #FFBF00). No SaaS blue. No gradients.
    - Microcopy tone: "one who laughs" — funny, direct, philosophically deep, never academic

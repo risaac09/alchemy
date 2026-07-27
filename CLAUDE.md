@@ -34,7 +34,7 @@ Constants, state shapes, the view state machine, and the feature list all live i
 ## Design Principles — READ BEFORE CHANGING ANYTHING
 
 - **Anti-slop.** No SaaS blue, no gradients, no gamification, no streaks, no badges. Warm-dark earthen tones.
-- **Intentional friction.** The 30s settle period, the forced reflection, the manual Obsidian copy are features, not bugs. Do not add convenience that removes friction.
+- **Friction by choice.** Make the mechanics effortless and invisible. Keep the friction at the moment the person chooses: the settle and the reflection they cross on purpose, not delays imposed across the plumbing. Default friction to zero on the mechanics, and let the user dial it up at the threshold. The settle and the somatic check are the threshold and they stay. The manual Obsidian copy is friction sitting in the plumbing, so reconsider it.
 - **Finitude.** The 7-item cap and decay mechanics enforce scarcity. Do not increase capacity or disable decay.
 - **No external services.** No API calls, no analytics, no telemetry, no AI features. Everything runs locally in the browser.
 - **Single file per concern.** One CSS file, one JS file. Do not split into modules or add a build step unless converting to Obsidian plugin.
