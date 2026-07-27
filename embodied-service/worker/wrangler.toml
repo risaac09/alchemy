@@ -1,0 +1,37 @@
+name = "embodied-service"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+# Serve the static UI from the same worker. Requests that don't match an /api
+# route fall through to these assets. Because the UI is same-origin, no CORS
+# header is needed for it.
+[assets]
+directory = "../ui"
+binding = "ASSETS"
+
+[vars]
+# Leave ALLOWED_ORIGIN unset for same-origin only (the safe default). Set it to
+# the exact UI origin only if the UI is hosted separately. A bare "*" is
+# treated as unset and never emits a permissive header.
+# ALLOWED_ORIGIN = "https://embodied.example.com"
+
+# Daily token cap (input + output + cache reads) before the service returns
+# daily_capacity_reached. A blunt ceiling on the model bill.
+DAILY_TOKEN_CAP = "2000000"
+
+# Durable rate limiting (per IP) and the global spend counter.
+[[durable_objects.bindings]]
+name = "RATE_LIMITER"
+class_name = "RateLimiter"
+
+[[durable_objects.bindings]]
+name = "SPEND_COUNTER"
+class_name = "SpendCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RateLimiter", "SpendCounter"]
+
+# Secret, set out of band, never committed:
+#   wrangler secret put ANTHROPIC_API_KEY
+# Without it the worker runs in mock mode (no model call).
