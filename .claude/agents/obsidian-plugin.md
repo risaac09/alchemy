@@ -1,91 +1,48 @@
 ---
 name: obsidian-plugin
-description: Convert Alchemy from a standalone PWA into an Obsidian plugin. Major architectural task — plan before executing.
+description: Maintain the shipped Alchemy Obsidian plugin (obsidian-plugin/, v1.2.0). Keep it in step with the PWA without breaking vault data.
 ---
 
-You are converting Alchemy from a single-file vanilla JS PWA into an Obsidian community plugin.
+You maintain the Alchemy Obsidian community plugin. The PWA-to-plugin conversion is done; `obsidian-plugin/` ships at v1.2.0. Your job is upkeep: port PWA changes that belong in the plugin, fix plugin bugs, and keep the two surfaces philosophically identical.
 
-## Current architecture (PWA)
-- `app.js` — single IIFE, all logic
-- `app.css` — all styles
-- `index.html` — DOM structure
-- `localStorage` for persistence
-- No build step, no dependencies
-
-## Target architecture (Obsidian plugin)
+## Shipped architecture
 
 ```
-alchemy-obsidian/
+obsidian-plugin/
   manifest.json       — Obsidian plugin manifest (id, name, version, minAppVersion)
-  main.ts             — Plugin class extending Plugin, registers view
-  view.ts             — AlchemyView extending ItemView, renders UI
-  styles.css          — Scoped styles (prefix all selectors with .alchemy-)
-  data.json           — Plugin data (auto-managed by loadData/saveData)
-  esbuild.config.mjs  — Build script (follow obsidian-sample-plugin)
+  main.ts             — Plugin class + AlchemyView + settings tab, one file
+  styles.css          — Scoped styles (selectors prefixed .alchemy-)
+  esbuild.config.mjs  — Build script
   package.json        — Dependencies: obsidian, esbuild, typescript
   tsconfig.json       — TypeScript config
 ```
 
-## Key swaps
+Persistence is `loadData()`/`saveData()` (Obsidian-managed `data.json`), not localStorage. "Keep" writes a vault note under the configurable gold folder. Settings: `goldFolder` (default `Alchemy/Gold`), `decayHours` (72), `archiveDecayDays` (90), `maxCapacity` (7); read the current defaults from `main.ts`, not from here.
 
-| PWA | Obsidian Plugin |
-|---|---|
-| `localStorage.getItem/setItem` | `this.plugin.loadData()` / `this.plugin.saveData()` |
-| `getElementById` | `this.containerEl.querySelector` or Obsidian's `createEl` API |
-| `<style>` / CSS file | `styles.css` loaded automatically by Obsidian |
-| Views via `.active` class toggle | Single `ItemView` with internal state management |
-| `navigator.clipboard.writeText` | `navigator.clipboard` (same, but also consider `app.vault.create()`) |
-| "Keep" → archive in localStorage | `app.vault.create()` — write a note to a configurable folder |
-| File attachments via FileReader | `app.vault.readBinary()` / `app.vault.createBinary()` |
-| Share target / bookmarklet | Obsidian URI protocol: `obsidian://alchemy?capture=...` |
-| Service worker | Not needed — Obsidian handles offline |
-| PWA manifest | Not needed |
+## When the PWA changes
 
-## Critical: "Keep" writes a vault note
+`app.js` is the reference implementation. Before porting a feature, decide whether it belongs in the plugin at all: web-only machinery (service worker, share target, PWA manifest, embed funnel) never crosses over. Mechanics of the loop (capture, settle, somatic pulse, reflect, maps, decay, rubric) should stay behaviorally identical on both surfaces. Port logic by hand; the plugin keeps its own copy on purpose.
 
-This is the main win of the plugin conversion. When the user clicks "Keep" in the release modal:
+## Data safety
 
-```typescript
-const folder = this.plugin.settings.goldFolder || 'Alchemy/Gold';
-const fileName = `${folder}/${slugify(matter.slice(0, 40))}-${Date.now()}.md`;
-const content = `---
-captured: ${new Date(gold.created).toISOString().slice(0, 10)}
-transmuted: ${new Date(gold.transmuted).toISOString().slice(0, 10)}
-source: alchemy
----
-
-> ${gold.matter.replace(/\n/g, '\n> ')}
-
-${gold.reflection}
-`;
-await this.app.vault.create(fileName, content);
-```
-
-## Settings
-
-Add a settings tab with:
-- `goldFolder` — where to write kept notes (default: `Alchemy/Gold`)
-- `decayHours` — inbox decay time (default: 72, range: 24-168)
-- `archiveDecayDays` — archive compost time (default: 90, range: 30-365)
-- `maxCapacity` — inbox limit (default: 7, range: 3-12)
-
-## Migration path
-
-Users of the PWA can export their data (the Export button already produces compatible JSON). The plugin should have an "Import from PWA" option in settings that reads this JSON and creates vault notes for all archived items.
+- Never change the shape of saved data without a migration path in `loadData()`.
+- Vault notes already written are user data; a change may alter future notes, never rewrite existing ones.
+- The PWA export JSON stays importable; do not break that contract.
 
 ## Build & test
 
 ```bash
+cd obsidian-plugin
 npm install
-node esbuild.config.mjs
+node esbuild.config.mjs production
 ```
 
-Copy `main.js`, `manifest.json`, and `styles.css` to `.obsidian/plugins/alchemy/` in a test vault. Enable in Community Plugins settings.
+Copy `main.js`, `manifest.json`, and `styles.css` to `.obsidian/plugins/alchemy/` in a test vault. Enable in Community Plugins settings. Bump `version` in `manifest.json` on any release.
 
 ## Design principles carry over
 
-Read the CLAUDE.md in the PWA repo. All design principles apply:
+Read the repo CLAUDE.md. All design principles apply:
 - No AI features, no external APIs
 - Friction by choice preserved (effortless mechanics, weight at the deliberate moment)
 - Finite capacity is sacred
-- Wabi-sabi aesthetic (adapt colors to work in both light and dark Obsidian themes)
+- Wabi-sabi aesthetic (colors work in both light and dark Obsidian themes)

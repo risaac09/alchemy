@@ -2,10 +2,12 @@
 
 An antechamber for information metabolism. Absorbs The Metabolizer. Two products, one codebase:
 
-- **PWA** (`/`) — Single-page vanilla JS. No framework, no build step. Free at risaac09.github.io/alchemy/
+- **PWA** (`/`) — Single-page vanilla JS. No framework, no build step. Free at alchemy.rubinsteinproductions.com
 - **Obsidian plugin** (`/obsidian-plugin/`) — TypeScript + esbuild. "Keep" writes vault notes. Maps → subfolders.
 
-**Live:** https://risaac09.github.io/alchemy/
+Other surfaces ship alongside: `chrome-extension/`, `ios/`, `embodied-service/` (a Cloudflare Worker), and `methodology/embodied-ai/`; the full surface inventory is `docs/PRODUCT.md`.
+
+**Live:** https://alchemy.rubinsteinproductions.com
 **Repo:** https://github.com/risaac09/alchemy
 
 ## Architecture
@@ -36,7 +38,7 @@ Constants, state shapes, the view state machine, and the feature list all live i
 - **Anti-slop.** No SaaS blue, no gradients, no gamification, no streaks, no badges. Warm-dark earthen tones.
 - **Friction by choice.** Make the mechanics effortless and invisible. Keep the friction at the moment the person chooses: the settle and the reflection they cross on purpose, not delays imposed across the plumbing. Default friction to zero on the mechanics, and let the user dial it up at the threshold. The settle and the somatic check are the threshold and they stay. The manual Obsidian copy is friction sitting in the plumbing, so reconsider it.
 - **Finitude.** The 7-item cap and decay mechanics enforce scarcity. Do not increase capacity or disable decay.
-- **No external services.** No API calls, no analytics, no telemetry, no AI features. Everything runs locally in the browser.
+- **No external services in the PWA.** This principle scopes to `app.js`, the free tool: no API calls, no analytics, no telemetry, no AI features. Everything there runs locally in the browser. `embodied-service/` (the Cloudflare Worker) is the deliberate exception; it is the one place in the repo with a backend and a model call, and nothing from it enters `app.js`.
 - **Single file per concern.** One CSS file, one JS file. Do not split into modules or add a build step unless converting to Obsidian plugin.
 - **Wabi-sabi aesthetic.** The app should feel like a worn field notebook, not a software product. Microcopy should be funny, direct, and philosophically deep without being academic.
 

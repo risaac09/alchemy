@@ -8,6 +8,6 @@ Steps:
 4. Bump the service worker cache version in sw.js (e.g., alchemy-v4 → alchemy-v5)
 5. Commit the revert + cache bump together
 6. Push to main (GitHub Pages auto-deploys)
-7. Verify the site is live: `curl -s https://risaac09.github.io/alchemy/sw.js | head -1`
+7. Verify the site is live: `curl -sL https://alchemy.rubinsteinproductions.com/sw.js | head -1`
 
 If the revert has conflicts, stop and show them to the user rather than force-resolving.
