@@ -11,7 +11,7 @@
   },
   "keywords": ["pwa", "obsidian", "knowledge-management", "information-metabolism", "vanilla-js"],
   "author": "Isaac Rubinstein",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/risaac09/alchemy/issues"
   },

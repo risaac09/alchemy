@@ -34,7 +34,7 @@ You are deploying Alchemy to GitHub Pages.
    ```
    - Status should show the deployment is queued or building
    - GitHub Pages typically deploys within 1-2 minutes
-   - Live URL: https://risaac09.github.io/alchemy/
+   - Live URL: https://alchemy.rubinsteinproductions.com/
 
 6. **Post-deploy check:**
    - The service worker will serve the old cached version to existing users until the new SW activates

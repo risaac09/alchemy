@@ -7,4 +7,4 @@ Deploy Alchemy to GitHub Pages.
 5. For feature additions, bump `VERSION` in app.js (semver: major.minor.patch)
 6. Stage the changed files, commit with a descriptive message, push to origin main
 6. Check deployment status: `gh api repos/risaac09/alchemy/pages`
-7. Report the live URL: https://risaac09.github.io/alchemy/
+7. Report the live URL: https://alchemy.rubinsteinproductions.com/

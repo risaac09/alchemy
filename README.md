@@ -71,7 +71,7 @@ If you bought The Metabolizer: your $29 bought you the concept. Alchemy is the c
 
 ## Install
 
-**PWA:** [risaac09.github.io/alchemy](https://risaac09.github.io/alchemy/) — open and add to home screen.
+**PWA:** [alchemy.rubinsteinproductions.com](https://alchemy.rubinsteinproductions.com/) — open and add to home screen.
 
 **Obsidian Plugin:** Community Plugins → search "Alchemy" → Install → Enable. Or manually:
 ```bash
@@ -93,7 +93,7 @@ index.html     — DOM structure
 app.css        — All styles (~2650 lines)
 app.js         — All logic, single IIFE (~2740 lines)
 sw.js          — Service worker, cache-first
-test.js        — jsdom test suite (197 assertions)
+test.js        — jsdom test suite (`node test.js` reports the count)
 obsidian-plugin/
   main.ts      — Plugin class + AlchemyView + settings tab
   styles.css   — Scoped plugin styles
