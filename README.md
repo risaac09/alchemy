@@ -116,6 +116,8 @@ Service worker cache version lives in `sw.js` (currently `alchemy-v14`) — bump
 
 Forks welcome. Pull requests are generally not reviewed: this is a personal tool with deliberate constraints (the 7-item cap, the settle timer, the decay), so fork it and make it yours.
 
+What does travel back: corrections and field reports. If you tested Alchemy against your own practice, or walked it through the [PureLand journey](https://github.com/risaac09/pureland-fork-kit/blob/main/JOURNEY.md), [open an issue](https://github.com/risaac09/alchemy/issues) with what worked, what failed, and what it cost you. The kit's [field-test form](https://github.com/risaac09/pureland-fork-kit/blob/main/FIELD-TESTING.md) is a good shape for it. A failure report is worth more than praise. No support is promised; see [HONEST-ACCOUNT.md](HONEST-ACCOUNT.md).
+
 ## License
 
 MIT, see `LICENSE`.
