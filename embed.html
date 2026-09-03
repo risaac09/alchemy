@@ -33,10 +33,10 @@
   <header>
     <div class="header-left">
       <h1>Alche<span>m</span>y</h1>
-      <div class="cycle-glyph" id="cycleGlyph" aria-label="Adaptive cycle phase" role="img">
+      <button type="button" class="cycle-glyph" id="cycleGlyph" aria-label="Adaptive cycle phase" aria-describedby="cycleTooltip">
         r
         <span class="cycle-tooltip" id="cycleTooltip">Exploitation — rapid growth</span>
-      </div>
+      </button>
     </div>
     <div class="header-right">
       <div class="tape-counter" id="tapeCounter">000</div>
@@ -80,7 +80,7 @@
     <button class="active" data-view="inbox" id="navInbox" role="tab" aria-selected="true" aria-controls="viewInbox">Inbox<span class="tab-count" id="inboxCount"></span></button>
     <button data-view="archive" id="navArchive" role="tab" aria-selected="false" aria-controls="viewArchive">Archive<span class="tab-count" id="archiveCount"></span></button>
     <button data-view="log" id="navLog" role="tab" aria-selected="false" aria-controls="viewLog">Log</button>
-    <button data-view="diagnostic" id="navDiagnostic" role="tab" aria-selected="false" aria-controls="viewDiagnostic">Diag</button>
+    <button data-view="diagnostic" id="navDiagnostic" role="tab" aria-selected="false" aria-controls="viewDiagnostic">Diagnostic</button>
   </nav>
 
   <!-- INBOX VIEW -->
@@ -147,7 +147,7 @@
 
       <div class="body-check-wrap">
         <label class="body-check-label" for="bodyCheckInput">Somatic pulse</label>
-        <input class="body-check-input" id="bodyCheckInput" type="text" maxlength="30" placeholder="one word — what's loudest?" autocomplete="off" spellcheck="false" />
+        <input class="body-check-input" id="bodyCheckInput" type="text" maxlength="30" placeholder="one word: what's loudest?" autocomplete="off" spellcheck="false" />
       </div>
 
       <div class="reflect-input-wrap">
@@ -194,9 +194,9 @@
       </div>
       <div class="archive-map-filter" id="archiveMapFilter">
         <button class="archive-map-filter-btn active" data-map="">all</button>
-        <button class="archive-map-filter-btn" data-map="observation">obs</button>
-        <button class="archive-map-filter-btn" data-map="question">qn</button>
-        <button class="archive-map-filter-btn" data-map="connection">conn</button>
+        <button class="archive-map-filter-btn" data-map="observation">observation</button>
+        <button class="archive-map-filter-btn" data-map="question">question</button>
+        <button class="archive-map-filter-btn" data-map="connection">connection</button>
         <button class="archive-map-filter-btn" data-map="tension">tension</button>
         <button class="archive-map-filter-btn" data-map="practice">practice</button>
       </div>
