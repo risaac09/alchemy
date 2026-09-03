@@ -8,7 +8,7 @@ Alchemy is a free, account-less PWA for information metabolism: capture an item,
 
 | Surface | Where | Build | Version |
 |---|---|---|---|
-| PWA | `index.html` + `app.js`, GH Pages, CNAME `alchemy.rubinsteinproductions.com` | none | 1.4.0 (`app.js` line 7, `package.json`) |
+| PWA | `index.html` + `app.js`, GH Pages, CNAME `alchemy.rubinsteinproductions.com` | none | 1.5.0 (`app.js` line 7, `package.json`) |
 | Embed funnel | `embed.html` + `embed-funnel.js`, iframed on rubinsteinproductions.com/services | none | rides the PWA |
 | Obsidian plugin | `obsidian-plugin/` (TypeScript) | esbuild | 1.2.0 (`obsidian-plugin/manifest.json`) |
 | Chrome extension | `chrome-extension/` (MV3 popup capture, `popup.html` + `popup.js`) | none | 1.2.0 (`chrome-extension/manifest.json`) |
@@ -23,7 +23,7 @@ Gap: `chrome-extension/` has no documentation anywhere beyond its own manifest, 
 
 ## How it runs (operational)
 
-Deployment is push to `main`, GitHub Pages auto-deploys. Any change to cached assets requires a `CACHE_NAME` bump in `sw.js` (currently `alchemy-v14`) and feature additions bump `VERSION` in `app.js`. The full checklist is `.claude/commands/deploy.md`; rollback is `.claude/commands/rollback.md`. Tests: `node test.js` (jsdom required), plus the four browser-only checks in `CLAUDE.md`'s Testing section. Plugin build: `cd obsidian-plugin && npm install && node esbuild.config.mjs production`, then hand-copy the outputs into a vault. iOS setup and App Store distribution: `ios/README.md`. Local serve: `python3 -m http.server 3400` (`.claude/launch.json`).
+Deployment is push to `main`, GitHub Pages auto-deploys. Any change to cached assets requires a `CACHE_NAME` bump in `sw.js` (currently `alchemy-v15`) and feature additions bump `VERSION` in `app.js`. The full checklist is `.claude/commands/deploy.md`; rollback is `.claude/commands/rollback.md`. Tests: `node test.js` (jsdom required), plus the four browser-only checks in `CLAUDE.md`'s Testing section. Plugin build: `cd obsidian-plugin && npm install && node esbuild.config.mjs production`, then hand-copy the outputs into a vault. iOS setup and App Store distribution: `ios/README.md`. Local serve: `python3 -m http.server 3400` (`.claude/launch.json`).
 
 CI exists for one surface. `.github/workflows/embodied-verify.yml` runs the deterministic safety floor on every push or PR touching `embodied-service/`: `node --check` over the worker modules, then the verification harness `embodied-service/verify/verify.mjs`. The Worker deploy job is gated behind that verify, fires only on manual `workflow_dispatch`, and skips itself when the `CLOUDFLARE_API_TOKEN` secret is absent. The PWA has no CI and no git hooks; `node test.js` runs when someone remembers, and the `/deploy` SOP does not include it.
 
@@ -55,7 +55,7 @@ Gap: App Store submission state for the iOS wrapper is recorded nowhere; the run
 
 Automated:
 - GitHub Pages deploy. Trigger: push to `main`. Publishes the repo root to alchemy.rubinsteinproductions.com. No secrets.
-- Service worker (`sw.js`, `CACHE_NAME` `alchemy-v14`). Trigger: page load. Cache-first for the app shell and Google Fonts. Invalidation is manual, by version bump.
+- Service worker (`sw.js`, `CACHE_NAME` `alchemy-v15`). Trigger: page load. Cache-first for the app shell and Google Fonts. Invalidation is manual, by version bump.
 - `embodied-verify.yml` (Actions). Trigger: push or PR touching `embodied-service/`. Runs the safety floor (syntax checks plus the verification harness); the gated Worker deploy job runs only on manual dispatch with the `CLOUDFLARE_API_TOKEN` secret set. No secrets needed for the verify itself.
 - Nothing else. No cron, no git hooks, no CI run of the PWA test suite.
 

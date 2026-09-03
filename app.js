@@ -4,7 +4,7 @@
   // ═══════════════════════════════════════════════
   //  THERMODYNAMIC CONSTANTS
   // ═══════════════════════════════════════════════
-  const VERSION = '1.4.0';
+  const VERSION = '1.5.0';
   const BASE_MAX_CAPACITY = 7;     // Cassette tape finitude (default)
   let MAX_CAPACITY = BASE_MAX_CAPACITY; // Mutated by diagnostic-reactive tuning
   const DECAY_MS = 72 * 3600000;   // 72 hours to full decay
@@ -164,6 +164,10 @@
   const cycleGlyph = $('cycleGlyph');
   const cycleTooltip = $('cycleTooltip');
   const ascendencyFill = $('ascendencyFill');
+  if (cycleGlyph) {
+    cycleGlyph.addEventListener('click', (e) => { e.stopPropagation(); cycleGlyph.classList.toggle('open'); });
+    document.addEventListener('click', () => cycleGlyph.classList.remove('open'));
+  }
   const ascendencyLabel = $('ascendencyLabel');
   const toast = $('toast');
 
@@ -290,7 +294,7 @@
     if (item.type) return item.type; // already classified
     if (item.fileType && item.fileType.startsWith('image/')) return 'image';
     if (item.fileName) return 'document';
-    if (isUrl(item.text)) return 'link';
+    if (isUrl(item.text || item.matter || '')) return 'link';
     return 'text';
   }
 
@@ -508,8 +512,8 @@
   // Emergy cost: hours alive (metaphorical "metabolic cost")
   function emergyCost(item) {
     const hours = (Date.now() - item.created) / 3600000;
-    if (hours < 1) return '< 1h emergy';
-    return Math.floor(hours) + 'h emergy';
+    if (hours < 1) return 'under an hour';
+    return Math.floor(hours) + 'h';
   }
 
   // Carrying cost for archive
@@ -517,7 +521,7 @@
     if (state.archive.length === 0) return '';
     let totalHours = 0;
     state.archive.forEach(item => {
-      totalHours += (Date.now() - item.archived) / 3600000;
+      totalHours += (Date.now() - (item.archived || item.transmuted || Date.now())) / 3600000;
     });
     const days = Math.floor(totalHours / 24);
     if (days < 1) return state.archive.length + ' items · < 1d carrying cost';
@@ -577,6 +581,19 @@
   // ═══════════════════════════════════════════════
   let currentView = 'inbox';
 
+  // Loop strip: where the person is in the loop. Reflect and gold views carry
+  // one; the strip lists every station and this marks done / current.
+  const LOOP_STEPS = ['inhale', 'settle', 'pulse', 'reflect', 'alchemize', 'map', 'release'];
+  const LOOP_VIEW_STEPS = { reflect: ['pulse', 'reflect'], gold: ['map', 'release'] };
+  function setLoopStep(current) {
+    const firstIdx = LOOP_STEPS.indexOf(current[0]);
+    document.querySelectorAll('.loop-strip li').forEach(li => {
+      const i = LOOP_STEPS.indexOf(li.dataset.step);
+      li.classList.toggle('done', i < firstIdx);
+      li.classList.toggle('current', current.includes(li.dataset.step));
+    });
+  }
+
   function showView(name) {
     currentView = name;
     Object.values(views).forEach(v => v.classList.remove('active'));
@@ -585,6 +602,7 @@
     if (navBtns[name]) { navBtns[name].classList.add('active'); navBtns[name].setAttribute('aria-selected', 'true'); }
     // Focused views (reflect/gold) hide the chrome so content starts at top
     shell.classList.toggle('shell--focused', name === 'reflect' || name === 'gold');
+    if (LOOP_VIEW_STEPS[name]) setLoopStep(LOOP_VIEW_STEPS[name]);
   }
 
   navBtns.inbox.addEventListener('click', () => { showView('inbox'); renderInbox(); });
@@ -1192,7 +1210,7 @@
     modalTrigger = releaseBtn;
     if (currentGold) {
       const cost = emergyCost(currentGold);
-      modalCost.textContent = 'This item has cost you ' + cost + ' of metabolic attention';
+      modalCost.textContent = 'Carried for ' + cost + ' of metabolic attention';
     }
     modalKeep.style.display = '';
     resetMapButtons();
@@ -1678,12 +1696,12 @@
     const ascPct = Math.round(asc * 100);
     ascendencyFill.style.width = ascPct + '%';
     ascendencyFill.parentElement.setAttribute('aria-valuenow', ascPct);
-    ascendencyLabel.textContent = ascPct + '% asc';
+    ascendencyLabel.textContent = ascPct + '% kept';
 
     // Warn if over 70% (rigidity trap)
     if (ascPct > 70) {
       ascendencyFill.classList.add('rigid');
-      ascendencyLabel.textContent = ascPct + '% asc · rigid';
+      ascendencyLabel.textContent = ascPct + '% kept · rigid';
     } else {
       ascendencyFill.classList.remove('rigid');
     }
@@ -1721,7 +1739,7 @@
     archiveCount.textContent = state.archive.length > 0 ? ` ${state.archive.length}` : '';
 
     const total = state.stats.totalKept + state.stats.totalReleased;
-    if (tapeCounter) tapeCounter.textContent = total > 0 ? `${total} released` : '';
+    if (tapeCounter) tapeCounter.textContent = total > 0 ? `${total} metabolized` : '';
   }
 
   function updateReels() {
@@ -2007,23 +2025,25 @@
 
       ${state.errors.length > 0 ? `
       <div class="log-section">
-        <div class="log-section-title">Errors (${state.errors.length})</div>
-        <div class="log-errors">
-          ${state.errors.slice(-10).reverse().map(e => `
-            <div class="log-error-entry">
-              <span class="log-error-time">${new Date(e.ts).toLocaleDateString()}</span>
-              <span class="log-error-msg">${escapeHtml(e.msg)}</span>
-            </div>
-          `).join('')}
-        </div>
-        <button class="log-clear-errors" onclick="document.dispatchEvent(new CustomEvent('clearErrors'))">Clear errors</button>
+        <details class="log-errors-details">
+          <summary><span class="log-section-title">Errors (${state.errors.length})</span></summary>
+          <div class="log-errors">
+            ${state.errors.slice(-10).reverse().map(e => `
+              <div class="log-error-entry">
+                <span class="log-error-time">${new Date(e.ts).toLocaleDateString()}</span>
+                <span class="log-error-msg">${escapeHtml(e.msg)}</span>
+              </div>
+            `).join('')}
+            <button class="log-clear-errors" onclick="document.dispatchEvent(new CustomEvent('clearErrors'))">Clear errors</button>
+          </div>
+        </details>
       </div>
       ` : ''}
 
       <div class="log-section">
         <div class="log-section-title">Shortcuts</div>
         <div class="log-shortcuts">
-          <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> switch views</span>
+          <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> switch views</span>
           <span><kbd>n</kbd> new capture</span>
           <span><kbd>esc</kbd> go back / close</span>
           <span><kbd>${navigator.platform && navigator.platform.indexOf('Mac') > -1 ? '⌘' : 'Ctrl'}+↵</kbd> alchemize</span>
@@ -2061,8 +2081,6 @@
           <p class="log-prose" style="font-size:0.78rem; margin-top:4px;">Export your data to preserve this baseline.</p>
         </div>`;
       })() : ''}
-
-      <div class="log-version">v${VERSION}</div>
     `;
 
     const notifyBtn = document.getElementById('logNotifyBtn');
@@ -2140,7 +2158,7 @@
         </div>
       ` : ''}
     `;
-    logContent.appendChild(thresholdSection);
+    logContent.prepend(thresholdSection);
 
     document.getElementById('thresholdSubmit').addEventListener('click', () => {
       const input = document.getElementById('thresholdInput');
@@ -2174,7 +2192,7 @@
         </div>
       ` : ''}
     `;
-    logContent.appendChild(frictionSection);
+    thresholdSection.after(frictionSection);
 
     document.getElementById('frictionSubmit').addEventListener('click', () => {
       const input = document.getElementById('frictionInput');
@@ -2194,6 +2212,11 @@
         if (e.key === 'Enter') { e.preventDefault(); document.getElementById('frictionSubmit').click(); }
       });
     }
+
+    const versionEl = document.createElement('div');
+    versionEl.className = 'log-version';
+    versionEl.textContent = 'v' + VERSION;
+    logContent.appendChild(versionEl);
   }
 
   // ═══════════════════════════════════════════════

@@ -25,7 +25,7 @@ Unattended items decay after 72 hours. Archived gold composts after 90 days. Eve
 
 ### Diagnostic
 
-A sixth view (`Diag`, keyboard `4`) offers a 12-question snapshot of how information moves through your system. Four axes (intake / transformation / expression / return flow) plot you on a 2×2 map — Stagnant, Drowning, Distilling, or Thriving. Computed locally, no server. The placement surfaces back in the Log. An embeddable version lives at `embed.html` for iframing on third-party sites.
+A sixth view (`Diagnostic`, keyboard `4`) offers a 12-question snapshot of how information moves through your system. Four axes (intake / transformation / expression / return flow) plot you on a 2×2 map — Stagnant, Drowning, Distilling, or Thriving. Computed locally, no server. The placement surfaces back in the Log. An embeddable version lives at `embed.html` for iframing on third-party sites.
 
 ---
 
@@ -40,6 +40,8 @@ A sixth view (`Diag`, keyboard `4`) offers a 12-question snapshot of how informa
 | **Best for** | Any device, quick capture | Obsidian users who want gold in their vault |
 
 **PWA → Plugin funnel:** Start with the PWA. When your archive grows and you want gold woven into your vault, export your data and import it into the plugin.
+
+**An entryway to the PureLand journey.** Alchemy is the practice companion for the [PureLand fork kit](https://github.com/risaac09/pureland-fork-kit): its capture loop rehearses the noticing that station two (Observe) of the [journey](https://github.com/risaac09/pureland-fork-kit/blob/main/JOURNEY.md) asks for. The first-run screen says so, the footer links there, and a loop strip in the reflect and gold views keeps a newcomer oriented. It is a tool with deliberate constraints, not a validated instrument.
 
 ---
 
@@ -90,8 +92,8 @@ No build step for the PWA. Edit files directly and push.
 
 ```
 index.html     — DOM structure
-app.css        — All styles (~2650 lines)
-app.js         — All logic, single IIFE (~2740 lines)
+app.css        — All styles, one design system (~2050 lines)
+app.js         — All logic, single IIFE (~2760 lines)
 sw.js          — Service worker, cache-first
 test.js        — jsdom test suite (`node test.js` reports the count)
 obsidian-plugin/
@@ -110,7 +112,7 @@ node esbuild.config.mjs production
 ```
 
 **Deploy PWA:** push to `main` — GitHub Pages auto-deploys.
-Service worker cache version lives in `sw.js` (currently `alchemy-v14`) — bump on breaking changes.
+Service worker cache version lives in `sw.js` (currently `alchemy-v15`) — bump on breaking changes.
 
 ## Contributing
 
