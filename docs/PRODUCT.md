@@ -8,7 +8,7 @@ Alchemy is a free, account-less PWA for information metabolism: capture an item,
 
 | Surface | Where | Build | Version |
 |---|---|---|---|
-| PWA | `index.html` + `app.js`, GH Pages, CNAME `alchemy.rubinsteinproductions.com` | none | 1.5.0 (`app.js` line 7, `package.json`) |
+| PWA | `index.html` + `app.js`, GH Pages, CNAME `alchemy.rubinsteinproductions.com` | none | 1.5.1 (`app.js` line 7, `package.json`) |
 | Embed funnel | `embed.html` + `embed-funnel.js`, iframed on rubinsteinproductions.com/services | none | rides the PWA |
 | Obsidian plugin | `obsidian-plugin/` (TypeScript) | esbuild | 1.2.0 (`obsidian-plugin/manifest.json`) |
 | Chrome extension | `chrome-extension/` (MV3 popup capture, `popup.html` + `popup.js`) | none | 1.2.0 (`chrome-extension/manifest.json`) |
@@ -23,7 +23,7 @@ Gap: `chrome-extension/` has no documentation anywhere beyond its own manifest, 
 
 ## How it runs (operational)
 
-Deployment is push to `main`, GitHub Pages auto-deploys. Any change to cached assets requires a `CACHE_NAME` bump in `sw.js` (currently `alchemy-v15`) and feature additions bump `VERSION` in `app.js`. The full checklist is `.claude/commands/deploy.md`; rollback is `.claude/commands/rollback.md`. Tests: `node test.js` (jsdom required), plus the four browser-only checks in `CLAUDE.md`'s Testing section. Plugin build: `cd obsidian-plugin && npm install && node esbuild.config.mjs production`, then hand-copy the outputs into a vault. iOS setup and App Store distribution: `ios/README.md`. Local serve: `python3 -m http.server 3400` (`.claude/launch.json`).
+Deployment is push to `main`, GitHub Pages auto-deploys. Any change to cached assets requires a `CACHE_NAME` bump in `sw.js` (currently `alchemy-v16`) and feature additions bump `VERSION` in `app.js`. The full checklist is `.claude/commands/deploy.md`; rollback is `.claude/commands/rollback.md`. Tests: `node test.js` (jsdom required), plus the four browser-only checks in `CLAUDE.md`'s Testing section. Plugin build: `cd obsidian-plugin && npm install && node esbuild.config.mjs production`, then hand-copy the outputs into a vault. iOS setup and App Store distribution: `ios/README.md`. Local serve: `python3 -m http.server 3400` (`.claude/launch.json`).
 
 CI exists for one surface. `.github/workflows/embodied-verify.yml` runs the deterministic safety floor on every push or PR touching `embodied-service/`: `node --check` over the worker modules, then the verification harness `embodied-service/verify/verify.mjs`. The Worker deploy job is gated behind that verify, fires only on manual `workflow_dispatch`, and skips itself when the `CLOUDFLARE_API_TOKEN` secret is absent. The PWA has no CI and no git hooks; `node test.js` runs when someone remembers, and the `/deploy` SOP does not include it.
 
@@ -46,7 +46,7 @@ Positioning lives in `README.md`: a digital liver for information, free forever,
 
 Alchemy sits outside the tiered data hierarchy: a public product, not a data store, reading nothing from stack-data's index. It is one of the toolkit's phase-zero consuming repos: the deployed kit (the hooks, `phase-zero.md`, `model-routing.md`, `operating-brief.md`, `retrospective.md`, `settings.json`) lives in `.claude/` next to the repo's own bespoke pieces (agents, commands, loops, launch config). Kit files get edited in the toolkit source and redeployed, never in place.
 
-Decided 2026-09-04, the front door: the free PWA carries no ask. No invitation to share results, no conversation offer, no paid door, beyond the footer links to the PureLand journey, the honest account, and the source. Alchemy is the landing and the companion (JOURNEY.md's introductory "walking it on your own ecosystem" section, rehearsing station 2); the ask lives farther down the journey, at station 6 (Return), where the field-test template already sits. When it is placed there its shape is: free first pass (Isaac reads the exported report and the person's own words, one reply, one conversation), the paid PureLand Field Pilot door opening only inside that exchange; inbound folded into FT-001's record as a second route under the same harm hypothesis (triage burden, implied support expectation), same window closing 2026-11-22. Nothing in `app.js` changes for this; the 2026-06-22 guardrail holds.
+Decided 2026-09-04, the front door: the free PWA carries no ask. No invitation to share results, no conversation offer, no paid door, beyond the footer links to the PureLand method, the honest account, and the source. Alchemy is the landing and the companion (METHOD.md's "Running it on your own intake" section, rehearsing Attend); the ask lives farther down the method, at Report, the method's sixth step, where the field-test template already sits. It was placed there the same day, pureland-fork-kit PR #34 (the reply at Report, the template's return route, OFFERING.md's second way in, and an FT-001 addendum; kit PR #35 then renamed the vocabulary and folded JOURNEY.md into METHOD.md). Its shape: free first pass (Isaac reads the exported report and the person's own words, one reply, one conversation), the paid PureLand Field Pilot door opening only inside that exchange; inbound folded into FT-001's record as a second route under the same harm hypothesis (triage burden, implied support expectation), same window closing 2026-11-22. Nothing in `app.js` changes for this; the 2026-06-22 guardrail holds.
 
 Open decisions, none resolved by this doc:
 - The Metabolizer Gumroad listing: the "Alchemy Vault" rebrand question from `INTEGRATION-PLAN.md` stands undecided.
@@ -57,7 +57,7 @@ Gap: App Store submission state for the iOS wrapper is recorded nowhere; the run
 
 Automated:
 - GitHub Pages deploy. Trigger: push to `main`. Publishes the repo root to alchemy.rubinsteinproductions.com. No secrets.
-- Service worker (`sw.js`, `CACHE_NAME` `alchemy-v15`). Trigger: page load. Cache-first for the app shell and Google Fonts. Invalidation is manual, by version bump.
+- Service worker (`sw.js`, `CACHE_NAME` `alchemy-v16`). Trigger: page load. Cache-first for the app shell and Google Fonts. Invalidation is manual, by version bump.
 - `embodied-verify.yml` (Actions). Trigger: push or PR touching `embodied-service/`. Runs the safety floor (syntax checks plus the verification harness); the gated Worker deploy job runs only on manual dispatch with the `CLOUDFLARE_API_TOKEN` secret set. No secrets needed for the verify itself.
 - Nothing else. No cron, no git hooks, no CI run of the PWA test suite.
 

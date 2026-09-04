@@ -4,7 +4,7 @@
   // ═══════════════════════════════════════════════
   //  THERMODYNAMIC CONSTANTS
   // ═══════════════════════════════════════════════
-  const VERSION = '1.5.0';
+  const VERSION = '1.5.1';
   const BASE_MAX_CAPACITY = 7;     // Cassette tape finitude (default)
   let MAX_CAPACITY = BASE_MAX_CAPACITY; // Mutated by diagnostic-reactive tuning
   const DECAY_MS = 72 * 3600000;   // 72 hours to full decay
@@ -582,7 +582,7 @@
   let currentView = 'inbox';
 
   // Loop strip: where the person is in the loop. Reflect and gold views carry
-  // one; the strip lists every station and this marks done / current.
+  // one; the strip lists every step and this marks done / current.
   const LOOP_STEPS = ['inhale', 'settle', 'pulse', 'reflect', 'alchemize', 'map', 'release'];
   const LOOP_VIEW_STEPS = { reflect: ['pulse', 'reflect'], gold: ['map', 'release'] };
   function setLoopStep(current) {
@@ -2602,7 +2602,7 @@
     const nameField = f && f.landingField ? f.landingField(diagState) : '';
     return `<div class="diag-landing">
       <div class="diag-eyebrow">INFORMATION METABOLISM</div>
-      <h2 class="diag-heading">Diagnostic</h2>
+      <h2 class="diag-heading">Self-assessment</h2>
       <p class="diag-lede">A 12-question snapshot of how information moves through your system. Pipe or torus?</p>
       <ul class="diag-meta"><li>Twelve questions</li><li>About four minutes</li><li>Stored only on this device</li></ul>
       ${priorLine}
