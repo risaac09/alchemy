@@ -1107,7 +1107,7 @@ function testVersionDisplay() {
   doc.getElementById('navLog').click();
   const version = doc.querySelector('.log-version');
   assert(version !== null, 'Version element in log');
-  assert(version.textContent.includes('1.5.0'), 'Version shows 1.5.0');
+  assert(version.textContent.includes('1.5.1'), 'Version shows 1.5.1');
 
   dom.window.close();
 }

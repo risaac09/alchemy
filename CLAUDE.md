@@ -29,7 +29,7 @@ No build. No bundler. Edit the files directly and push.
 
 ## The loop
 
-Capture (Inhale) → Settle → Somatic pulse → Reflect (Pause) → Transform (Alchemize) → Map → Release (Exhale) → Rubric (self-assessment at Keep). The Diagnostic view runs independently: 12 questions, 4 axes, a 2×2 quadrant placement.
+Capture (Inhale) → Settle → Somatic pulse → Reflect (Pause) → Transform (Alchemize) → Map → Release (Exhale) → Rubric (self-assessment at Keep). The Self-assessment view (the diagnostic, in code) runs independently: 12 questions, 4 axes, a 2×2 quadrant placement.
 
 Constants, state shapes, the view state machine, and the feature list all live in `app.js` as named values near the top; read them there rather than from a copy here. `test.js` is the executable spec for all of it.
 

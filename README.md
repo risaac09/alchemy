@@ -23,9 +23,9 @@ Capture (Inhale) → Settle 30s → Somatic pulse → Reflect → Alchemize → 
 
 Unattended items decay after 72 hours. Archived gold composts after 90 days. Every 3 days, the oldest archived item resurfaces for re-evaluation.
 
-### Diagnostic
+### Self-assessment
 
-A sixth view (`Diagnostic`, keyboard `4`) offers a 12-question snapshot of how information moves through your system. Four axes (intake / transformation / expression / return flow) plot you on a 2×2 map — Stagnant, Drowning, Distilling, or Thriving. Computed locally, no server. The placement surfaces back in the Log. An embeddable version lives at `embed.html` for iframing on third-party sites.
+A sixth view (`Self-assessment`, keyboard `4`) offers a 12-question snapshot of how information moves through your system. Four axes (intake / transformation / expression / return flow) plot you on a 2×2 map — Stagnant, Drowning, Distilling, or Thriving. Computed locally, no server. The placement surfaces back in the Log. An embeddable version lives at `embed.html` for iframing on third-party sites.
 
 ---
 
@@ -41,7 +41,7 @@ A sixth view (`Diagnostic`, keyboard `4`) offers a 12-question snapshot of how i
 
 **PWA → Plugin funnel:** Start with the PWA. When your archive grows and you want gold woven into your vault, export your data and import it into the plugin.
 
-**An entryway to the PureLand journey.** Alchemy is the practice companion for the [PureLand fork kit](https://github.com/risaac09/pureland-fork-kit): its capture loop rehearses the noticing that station two (Observe) of the [journey](https://github.com/risaac09/pureland-fork-kit/blob/main/JOURNEY.md) asks for. The first-run screen says so, the footer links there, and a loop strip in the reflect and gold views keeps a newcomer oriented. It is a tool with deliberate constraints, not a validated instrument.
+**An entryway to the PureLand method.** Alchemy is the practice companion for the [PureLand fork kit](https://github.com/risaac09/pureland-fork-kit): its capture loop rehearses the noticing that Attend, the second step of the [method](https://github.com/risaac09/pureland-fork-kit/blob/main/METHOD.md), asks for. The first-run screen says so, the footer links there, and a loop strip in the reflect and gold views keeps a newcomer oriented. It is a tool with deliberate constraints, not a validated instrument.
 
 ---
 
@@ -112,13 +112,13 @@ node esbuild.config.mjs production
 ```
 
 **Deploy PWA:** push to `main` — GitHub Pages auto-deploys.
-Service worker cache version lives in `sw.js` (currently `alchemy-v15`) — bump on breaking changes.
+Service worker cache version lives in `sw.js` (currently `alchemy-v16`) — bump on breaking changes.
 
 ## Contributing
 
 Forks welcome. Pull requests are generally not reviewed: this is a personal tool with deliberate constraints (the 7-item cap, the settle timer, the decay), so fork it and make it yours.
 
-What does travel back: corrections and field reports. If you tested Alchemy against your own practice, or walked it through the [PureLand journey](https://github.com/risaac09/pureland-fork-kit/blob/main/JOURNEY.md), [open an issue](https://github.com/risaac09/alchemy/issues) with what worked, what failed, and what it cost you. The kit's [field-test form](https://github.com/risaac09/pureland-fork-kit/blob/main/FIELD-TESTING.md) is a good shape for it. A failure report is worth more than praise. No support is promised; see [HONEST-ACCOUNT.md](HONEST-ACCOUNT.md).
+What does travel back: corrections and field reports. If you tested Alchemy against your own practice, or ran it through the [PureLand method](https://github.com/risaac09/pureland-fork-kit/blob/main/METHOD.md), [open an issue](https://github.com/risaac09/alchemy/issues) with what worked, what failed, and what it cost you. The kit's [field-test form](https://github.com/risaac09/pureland-fork-kit/blob/main/templates/field-test.md) is a good shape for it. A failure report is worth more than praise. No support is promised; see [HONEST-ACCOUNT.md](HONEST-ACCOUNT.md).
 
 ## License
 
